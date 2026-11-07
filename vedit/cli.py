@@ -11,7 +11,8 @@ from vedit.report import VeditError, color_ok
 # verb -> (phase, one-line help, module or None while unbuilt).
 # A command module exposes `run(ns) -> Report` and optionally `add_args(parser)`; it is imported lazily.
 COMMANDS: dict[str, tuple[int, str, str | None]] = {
-    "new": (2, "create a project folder for a recording", "vedit.commands.new"),
+    "new": (2, "create a project folder for a video or recording", "vedit.commands.new"),
+    "importers": (12, "list importer plugins (recorder projects -> sources)", "vedit.commands.importers"),
     "transcribe": (2, "transcribe the source via Studio (cached)", "vedit.commands.transcribe"),
     "summarize": (7, "summary.md: chapters, visual moments, ASR errors", "vedit.commands.summarize"),
     "llm": (7, "run a saved prompt through the model router (JSON out)", "vedit.commands.llm"),
@@ -70,6 +71,7 @@ EFFECTS: dict[str, list[str]] = {
     "commands": ["reads"],
     "wait": ["reads"],
     "formats": ["reads"],
+    "importers": ["reads"],
     "output": ["reads", "writes"],
     "reframe": ["writes"],
 }
@@ -105,6 +107,7 @@ GUIDE_TOPIC: dict[str, str] = {
     "commands": "agents",
     "wait": "agents",
     "formats": "formats",
+    "importers": "importers",
     "output": "formats",
     "reframe": "formats",
 }

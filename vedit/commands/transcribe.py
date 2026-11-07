@@ -98,7 +98,7 @@ def _find(ns) -> tuple[Path, Project]:
         root = find_project(override=ns.project)
         return root, Project.load(root)
     except ProjectError as e:
-        raise VeditError(str(e), next="vedit new <cap-project>  (or: vedit transcribe --project PATH)") from e
+        raise VeditError(str(e), next="vedit new <video>  (or: vedit transcribe --project PATH)") from e
 
 
 def _spawn(ns, root: Path, paths: Paths, n: int) -> int:

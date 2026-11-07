@@ -2,14 +2,14 @@
 
 Two finished videos. Lift from them; don't rewrite from memory.
 
-- **T** = `~/Demos/tele-a7-growth-story/` (Arabic Iraqi, one Cap camera clip, yellow `#FFD60A`, Studio
+- **T** = `~/Demos/tele-a7-growth-story/` (Arabic Iraqi, one camera clip, yellow `#FFD60A`, Studio
   transcription, 2026-11). The newer, language-aware one: prefer it.
-- **C** = `~/Demos/claude-in-telegram-video/` (English, three Cap clips + screen recordings, violet Claude look,
+- **C** = `~/Demos/claude-in-telegram-video/` (English, three camera clips + screen recordings, violet Claude look,
   whisper.cpp, 2026-10). Its tools snapshot is also in `reference/template-claude-in-telegram/`.
 
 | vedit module | Source | Notes |
 |---|---|---|
-| `ingest/cap.py` | T `scripts/source.sh` | raw camera on Cap trims, frame-exact |
+| `recording.py` `trims_filter`, `ingest/media.py` | T `scripts/source.sh` | clean camera on its trims, frame-exact (recorder readers are importer plugins, outside the repo) |
 | `ingest/media.py` | T `scripts/media.sh`, `source.sh` | proxies, 48k WAV, program/matte symlinks |
 | `words/` | T `tools/words.py`, `build.py` (`wnorm`, `_AR` table) | Arabic normalisation lives in build.py today |
 | `words/` time mapping | T `tools/timeline.py` | `g(clip, t)` source→program, `src(t)` back |

@@ -51,7 +51,7 @@ def pl(c, track=1, **kw):
     return Placement(c, c.start, c.end - c.start, track, **kw)
 
 
-LABEL = {"logo": "octopus", "kicker": "قبل ٤ سنين", "title": "فتحت قناتي", "sub": "سطر"}
+LABEL = {"logo": "telegram", "kicker": "قبل ٤ سنين", "title": "فتحت قناتي", "sub": "سطر"}
 
 
 def items():
@@ -307,9 +307,7 @@ def test_yellow_doodle_owns_the_telegram_look(yellow):
     assert all(src[t] == "yellow-doodle" for t in V1) and src["custom"] == "base"
     assert yellow.data["colors"]["accent"] == "#FFD60A" and "Aref Ruqaa" in yellow.data["font"]["hand"]
     assert yellow.file("fonts/ArefRuqaa-Bold.ttf").parent.parent.name == "yellow-doodle"
-    assert yellow.data["logo_motion"]["spin"] == ["spark"] and {"telegram", "octopus", "spark"} <= set(
-        yellow.logos()
-    )
+    assert yellow.data["logo_motion"]["spin"] == ["spark"] and {"telegram", "spark"} <= set(yellow.logos())
     assert yellow.data["sfx"]["kinetic"] == ["pop", 0.16] and yellow.data["sfx"]["beat"] == [
         "click-soft",
         0.16,

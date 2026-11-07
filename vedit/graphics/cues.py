@@ -51,13 +51,19 @@ class Cue:
     key: str = ""
 
 
-def custom_logos(paths) -> dict[str, Path]:
-    d = Path(paths.custom) / "logos"
+def custom_logos(paths, channel: str | None = None) -> dict[str, Path]:
+    """Your logos, by name: `<config>/logos/`, then the channel's `logos/`, then the project's `custom/logos/`
+    (later wins; all win over the style pack's)."""
+    dirs = [chan.config_dir() / "logos"]
+    if channel:
+        dirs.append(chan.config_dir() / "channels" / channel / "logos")
+    dirs.append(Path(paths.custom) / "logos")
     out = {}
-    if d.is_dir():
-        for f in sorted(d.iterdir()):
-            if f.suffix in (".svg", ".png"):
-                out[f.stem] = f
+    for d in dirs:
+        if d.is_dir():
+            for f in sorted(d.iterdir()):
+                if f.suffix in (".svg", ".png"):
+                    out[f.stem] = f
     return out
 
 
@@ -257,7 +263,7 @@ def load(project, paths, edl: Edl, words_by_clip: dict, roots: list[Path] | None
         raise VeditError("cues.yaml: `cues:` must be a list", next=FIX)
     pool = _Packs(roots)
     file_style = chan.style_choice(project, data.get("style"))[0]
-    clogos = custom_logos(paths)
+    clogos = custom_logos(paths, getattr(project, "channel", None))
     root = Path(paths.root)
     out, errs, counts, seen = [], [], {}, set()
     for n, c in enumerate(raw):

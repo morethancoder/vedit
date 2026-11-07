@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Installed by scripts/guard.sh. This repo's history holds personal data (email, name, home paths, a recording).
+echo "✗ vedit's private repo is never pushed. Publish a scrubbed export with: make publish MSG=\"…\"" >&2
+exit 1

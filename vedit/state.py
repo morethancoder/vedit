@@ -123,16 +123,11 @@ def job_state(paths: Paths) -> str:
 
 
 def _source_hash(s, paths: Paths) -> str | None:
-    """Sample hash of a source's media files: the file, or for a Cap source the export and raw camera
-    that `vedit new` linked into src/ (`<name>.*`, `<name>-camera.*`). None when one is missing."""
-    if s.cap is None:
+    """Sample hash of a source's media: the edited video, plus each clean camera file when it has one.
+    None when one is missing."""
+    if not s.camera:
         return sample_hash(s.path)
-    parts = []
-    for pat in (f"{s.name}.*", f"{s.name}-camera.*"):
-        found = sorted(paths.src.glob(pat))
-        if not found:
-            return None
-        parts += [sample_hash(f) for f in found]
+    parts = [sample_hash(f) for f in (s.file, *s.camera)]
     return None if None in parts else hash_of(parts)
 
 

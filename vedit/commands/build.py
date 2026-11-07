@@ -42,7 +42,7 @@ def _load(ns):
         root = find_project(override=ns.project)
         project = Project.load(root)
     except ProjectError as e:
-        raise VeditError(str(e), next="vedit new <cap-project>  (or: vedit build --project PATH)") from e
+        raise VeditError(str(e), next="vedit new <video>  (or: vedit build --project PATH)") from e
     paths = project.paths
     state.refuse_while_rendering(paths, "build")
     edl_f = paths.edl / "edl.json"
@@ -79,7 +79,7 @@ def make_plan(project, paths, edl):
 
     main = pack_of(style)  # checked before the cues, so a broken pack shows all its problems at once
     cues = cuesmod.load(project, paths, edl, words, roots)
-    clogos = cuesmod.custom_logos(paths)
+    clogos = cuesmod.custom_logos(paths, project.channel)
     logos = {**main.logos(), **clogos}
     chs = cuesmod.chapters(cutsfile.load(paths.cuts), edl, main, logos, style) if paths.cuts.exists() else []
     track = FaceTrack.load(paths, clips, edl)

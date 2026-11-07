@@ -35,13 +35,13 @@ cuts:
   - {near: A 12, from: "هذا الشي", to: "خلي أرجع"}
 keep: [{near: A 15, say: "إم"}]
 pins: [{near: A 10.5, in: 10.4, out: 10.9}]
-chapters: [{near: A 11, title: T, kicker: K, logo: octopus}]
+chapters: [{near: A 11, title: T, kicker: K, logo: telegram}]
 end: last-word
 """,
     )
     assert cf.pauses == {"max": 0.6, "keep": 0.3}
     assert cf.cuts[0].window == 2 and cf.cuts[1].from_ == "هذا الشي"
-    assert cf.chapters[0].logo == "octopus" and cf.end == "last-word"
+    assert cf.chapters[0].logo == "telegram" and cf.end == "last-word"
 
 
 @pytest.mark.parametrize(

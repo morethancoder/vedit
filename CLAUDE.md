@@ -16,3 +16,13 @@ Read `README.md`, then `plans/plan.md` and `plans/principles.md` before touching
   summarizing (Haiku `reader` for mechanical sweeps, Sonnet `researcher` when relevance must be judged); never
   for writing vedit code. Each brief ends with a short report.
 - No time estimates in plans or docs.
+- **Footage-agnostic, no personal choices in code** (the creator, 2026-11-07). vedit takes any video file; never name
+  or special-case a particular recorder app in the repo. Recorder support goes in importer plugins in the
+  user's config (`~/.config/vedit/importers/`). Personal defaults (styles, logos, languages, paths, brands) live in
+  `config.yaml` / channels, never as code defaults or base-pack assets; help examples stay neutral.
+- **The GitHub repo (github.com/morethancoder/vedit) is public and never gets personal data** (the creator, 2026-11-07).
+  Publish only with `make publish MSG="what changed"`: it exports HEAD scrubbed, runs the tests on the export,
+  checks tree, message and author (`scripts/public_check.py`) and pushes from `.public/` with the noreply author.
+  Never push this repo, add a remote, or write to GitHub any other way: its history holds the personal email,
+  name, home paths and the speech clip. Hooks enforce it (`.claude/hooks/guard-publish.sh`; git pre-push via
+  `make guard`). If the checker flags something, fix the source or the scrub, never the checker's rules.

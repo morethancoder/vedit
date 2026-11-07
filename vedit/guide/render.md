@@ -24,10 +24,10 @@ next: vedit status
   `vedit cut` refuse (they would change files it reads); stop it with `kill <pid>` from `vedit status`.
 - `vedit clean`: removes frame caches, render chunks, scratch audio/images and review caches under `.vedit/` and
   prints the space freed per path and in total. It refuses while a job runs. `vedit clean --posted` (only after
-  the upload is posted) also deletes renders, proxies, program, cut-out mattes and the originals: the `.cap`
-  folders of `cap:` sources (also any `.cap` with the same `pretty_name`) and `file:` sources. It lists every
-  path with its size and asks first (no TTY: lists and stops unless `--yes`); `--dry-run` only lists. Cap
-  exports in `~/Movies/YT/` are APFS clones and are listed as freeing about 0. Kept always: cuts.yaml,
+  the upload is posted) also deletes renders, proxies, program, cut-out mattes and the originals: plain `file:`
+  sources, and for importer sources the recorder project (`origin:`, or what the importer's `originals()` names).
+  Edited videos outside a recorder project are listed as kept (often clones that free about 0). It lists every
+  path with its size and asks first (no TTY: lists and stops unless `--yes`); `--dry-run` only lists. Kept always: cuts.yaml,
   cues.yaml, custom/, subs/, youtube/, transcripts, words, edl.
 
 ## Long jobs

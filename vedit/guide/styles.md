@@ -40,7 +40,7 @@ pack name. A name that resolves nowhere is an error that lists the places search
 cue `style:`, then cues.yaml `style:`, then project.yaml `style:`, then the channel default (`vedit channel
 add <handle> --style <name>`), then the global default (`style:` in `~/.config/vedit/config.yaml`), then
 `base`. `vedit status` prints the one that applies and where it came from, for example
-`style yellow-doodle (from channel ali)`. To switch a video, change that one line; nothing else.
+`style claude-violet (from channel my-channel)`. To switch a video, change that one line; nothing else.
 
 ## Pack folder
 

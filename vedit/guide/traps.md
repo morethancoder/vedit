@@ -12,7 +12,8 @@ Each cost real time once. vedit handles them; do not work around it.
 - Iraqi Arabic gets rewritten toward formal Arabic by some models, so words stop matching the audio. Use the
   dialect set in project.yaml.
 - A "filler" cut once dropped a "ما" and flipped the meaning. Join checks compare meaning-bearing words.
-- Cap exports may already be pause-trimmed or mirror the camera; vedit reads the Cap project, not the export.
+- A recorder's export may already be pause-trimmed or mirror the camera; an importer that reads the recorder's
+  project gives vedit the clean camera and trims instead (`vedit guide importers`).
 - When the cut changes, cues anchored to words follow; if you add words back, re-check the cues near them.
 
 ## Faces and cut-outs

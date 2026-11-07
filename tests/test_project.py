@@ -20,13 +20,34 @@ def test_valid_load_and_defaults(tmp_path):
     assert not (tmp_path / ".vedit").exists()
 
 
-def test_cap_tilde_and_camera(tmp_path, monkeypatch):
+def test_camera_source_tilde_trims(tmp_path, monkeypatch):
     monkeypatch.setenv("HOME", str(tmp_path))
-    (tmp_path / "x.cap").mkdir()
-    p = Project.load(
-        make(tmp_path, "slug: d\nlang: en\nsources:\n  A: { cap: '~/x.cap', camera: raw }\n", media=False)
-    )
-    assert p.sources["A"].cap == (tmp_path / "x.cap") and p.sources["A"].camera == "raw"
+    for n in ("e.mp4", "c0.mov", "c1.mov"):
+        (tmp_path / n).write_bytes(b"x")
+    p = Project.load(make(tmp_path, (
+        "slug: d\nlang: en\nsources:\n  A: { file: '~/e.mp4', camera: ['~/c0.mov', '~/c1.mov'],"
+        " trims: [[0, 0, 1.5], [1, 2, 3]], fps: 25, mirror: true, origin: '~/gone.rec', importer: x }\n"), media=False))  # fmt: skip
+    s = p.sources["A"]
+    assert s.file == tmp_path / "e.mp4" and s.camera == [tmp_path / "c0.mov", tmp_path / "c1.mov"]
+    assert [(t.track, t.start, t.end) for t in s.trims] == [(0, 0.0, 1.5), (1, 2.0, 3.0)]
+    assert s.fps == 25 and s.mirror and s.origin == tmp_path / "gone.rec" and s.importer == "x" and s.punch_in
+
+
+@pytest.mark.parametrize(
+    "spec,frag",
+    [
+        ("{ camera: src/a.mov }", "needs 'file'"),
+        ("{ file: src/a.mov, trims: [[0, 0, 1]] }", "needs a camera"),
+        ("{ file: src/a.mov, camera: src/a.mov, trims: [[1, 0, 1]] }", "no camera file"),
+        ("{ file: src/a.mov, camera: src/a.mov, trims: [[0, 2, 1]] }", "end > start"),
+        ("{ file: src/a.mov, fps: 0 }", "whole number"),
+        ("{ file: src/a.mov, mirror: yes please }", "true or false"),
+        ("{ file: src/a.mov, recorder: x }", "unknown key 'recorder'"),
+    ],
+)
+def test_bad_sources(tmp_path, spec, frag):
+    with pytest.raises(ProjectError, match=frag):
+        Project.load(make(tmp_path, f"slug: d\nlang: en\nsources:\n  A: {spec}\n"))
 
 
 @pytest.mark.parametrize(

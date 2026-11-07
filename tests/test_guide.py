@@ -10,6 +10,7 @@ CUE_TYPES = ["label", "chip", "kinetic", "big-number", "doodle", "screen", "chap
 TOPICS = [
     "agents",
     "formats",
+    "importers",
     "ingest",
     "cuts",
     "drafts",

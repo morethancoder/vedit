@@ -71,7 +71,7 @@ def _find(ns) -> Project:
     try:
         return Project.load(find_project(override=ns.project))
     except ProjectError as e:
-        raise VeditError(str(e), next="vedit new <cap-project>  (or: vedit listen --project PATH)") from e
+        raise VeditError(str(e), next="vedit new <video>  (or: vedit listen --project PATH)") from e
 
 
 def _wav(project: Project, clip: str) -> Path:

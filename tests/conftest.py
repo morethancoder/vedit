@@ -27,3 +27,46 @@ def pytest_configure(config):
     if not WAV.exists():
         subprocess.run([*common, "-f", "lavfi", "-i", "sine=frequency=220:sample_rate=48000:duration=10",
                         "-ac", "1", str(WAV)], check=True, stdin=subprocess.DEVNULL)  # fmt: skip
+
+
+import pytest
+
+FAKE_IMPORTER = '''"""Test recorder: a folder with rec.json naming the edited video, camera and trims."""
+import json
+from pathlib import Path
+
+from vedit.recording import Camera, Recording, Trim
+
+NAME = "myrec"
+
+
+def read(path):
+    path = Path(path)
+    if not (path / "rec.json").is_file():
+        return None
+    d = json.loads((path / "rec.json").read_text())
+    cam = Camera([path / c for c in d["camera"]], [Trim(*t) for t in d["trims"]], d["fps"], d.get("mirror", False))
+    return Recording(video=path / d["video"], name=d["name"], camera=cam, origin=path)
+
+
+def originals(origin):
+    return [(Path(origin), "myrec project")], []
+'''
+
+
+@pytest.fixture(autouse=True)
+def _isolated_config(tmp_path_factory, monkeypatch):
+    """Every test gets an empty config folder: the real ~/.config/vedit (its packs, channels and private
+    importer plugins) never leaks into a test run. Tests that need config set VEDIT_CONFIG_DIR themselves."""
+    monkeypatch.setenv("VEDIT_CONFIG_DIR", str(tmp_path_factory.mktemp("cfg")))
+    monkeypatch.delenv("VEDIT_IMPORTERS", raising=False)
+
+
+@pytest.fixture
+def fake_importer(tmp_path, monkeypatch):
+    """Install the test importer in a fresh config folder; returns that folder."""
+    d = tmp_path / "cfgimp"
+    (d / "importers").mkdir(parents=True)
+    (d / "importers" / "myrec.py").write_text(FAKE_IMPORTER)
+    monkeypatch.setenv("VEDIT_CONFIG_DIR", str(d))
+    return d

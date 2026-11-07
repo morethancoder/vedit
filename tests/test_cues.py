@@ -53,7 +53,7 @@ def run(tmp_path, text, project=None, edl=EDL, words=WORDS):
     return cu.load(project or SimpleNamespace(style=None), paths, edl, words, roots=ROOTS)
 
 
-LABEL = "logo: octopus\n    kicker: k\n    title: t\n"
+LABEL = "logo: telegram\n    kicker: k\n    title: t\n"
 
 
 def label(at, extra=""):
@@ -65,7 +65,7 @@ def test_anchor_start_and_default_end(tmp_path):
     assert (c.id, c.clip, c.src, c.start) == ("label-1", "A", 2.0, 2.0)
     assert c.end == 2.0 + cu.DEFAULT_LEN["label"]
     assert (
-        c.style == "base" and c.fields == {"logo": "octopus", "kicker": "k", "title": "t"} and not c.problems
+        c.style == "base" and c.fields == {"logo": "telegram", "kicker": "k", "title": "t"} and not c.problems
     )
     assert len(c.key) == 16
 
@@ -179,7 +179,7 @@ def test_ambiguous_with_near_is_reported(tmp_path):
 def test_validation_collects_everything(tmp_path):
     txt = f'''cues:
   - {{type: label, at: "{w(2)}", near: A 1.0, logo: nope, kicker: k, title: t, subb: s}}
-  - {{type: label, at: "{w(2)}", near: A 1.0, logo: octopus, kicker: k}}
+  - {{type: label, at: "{w(2)}", near: A 1.0, logo: telegram, kicker: k}}
   - {{type: bogus, at: "{w(2)}", near: A 1.0}}
   - {{type: chapter, at: "{w(2)}", near: A 1.0, title: t}}
   - {{type: big-number, at: "{w(2)}", near: A 1.0, word: 3, pre: [x]}}
@@ -204,7 +204,7 @@ def test_validation_collects_everything(tmp_path):
 def test_custom_logo_from_project(tmp_path):
     (tmp_path / "custom" / "logos").mkdir(parents=True)
     (tmp_path / "custom" / "logos" / "ptb.svg").write_text("<svg/>")
-    [c] = run(tmp_path, "cues:\n" + label(w(4), "2.0").replace("octopus", "ptb"))
+    [c] = run(tmp_path, "cues:\n" + label(w(4), "2.0").replace("telegram", "ptb"))
     assert c.fields["logo"] == "ptb"
 
 
@@ -268,10 +268,10 @@ def test_chapters_pair_with_holds(tmp_path):
             "total": 30.0,
         }
     )
-    cf = CutsFile(chapters=[Chapter("A 10", "Part one", "1", "octopus")])
+    cf = CutsFile(chapters=[Chapter("A 10", "Part one", "1", "telegram")])
     [c] = cu.chapters(cf, edl, packs_for_tests())
     assert (c.id, c.type, c.start, c.end) == ("chapter-1", "chapter", 9.5, 9.5 + 2.0 + 0.9)
-    assert c.fields == {"title": "Part one", "kicker": "1", "logo": "octopus"} and c.clip == "A" and c.key
+    assert c.fields == {"title": "Part one", "kicker": "1", "logo": "telegram"} and c.clip == "A" and c.key
     with pytest.raises(VeditError, match="0 chapter"):
         cu.chapters(CutsFile(), edl, packs_for_tests())
     with pytest.raises(VeditError, match="logo 'zz'"):

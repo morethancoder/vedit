@@ -4,7 +4,7 @@ next: vedit status
 ---
 # vedit
 
-vedit turns a talk recording (Cap project or video file) into a finished YouTube edit: cleaned-up cut, motion
+vedit turns a talk recording (any video file) into a finished YouTube edit: cleaned-up cut, motion
 graphics, subtitles, a 4K60 master. Code owns the mechanics. You own the creative calls, written as data.
 
 ## The edit loop

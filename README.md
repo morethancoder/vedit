@@ -1,9 +1,14 @@
 # vedit
 
-A CLI that turns the creator's Cap talk recordings into a finished YouTube edit: cleaned-up cut, motion graphics,
-subtitles, a 4K60 master. The mechanics are settled in code; the model only makes the creative calls.
+A CLI that turns a talk recording (any video file) into a finished edit: cleaned-up cut, motion graphics,
+subtitles, a 4K60 master, plus Reels/Shorts/TikTok/Stories cut-downs kept clear of each platform's UI. The
+mechanics are settled in code; the model only makes the creative calls.
 
-**Status:** docs and plan only. Nothing is built yet. Start at [`plans/plan.md`](plans/plan.md).
+**Status:** v1 built and in use; open work in [`plans/plan.md`](plans/plan.md).
+
+**Your workflow, not ours:** vedit takes any video. Recorder projects (a clean camera behind an export, with its
+trims) come in through importer plugins you keep in `~/.config/vedit/importers/`; your channels, default style,
+logos and projects folder live in `~/.config/vedit/` too. Nothing personal is hard-coded (`vedit guide importers`).
 
 ## Why a CLI and not just a skill
 
@@ -15,15 +20,15 @@ in code with the best defaults, so one command does one stage and prints a short
 | Layer | Owns | Decided by |
 |---|---|---|
 | `vedit` (this repo) | ingest, transcription, applying cuts, join checks, face track, cut-outs, build, render, cleanup | code (settled) |
-| `cuts.yaml`, `cues.yaml` (per video) | what to cut, which graphics, what they say, which ideas get a doodle | the model + the creator |
+| `cuts.yaml`, `cues.yaml` (per video) | what to cut, which graphics, what they say, which ideas get a doodle | the model + you |
 | style packs (built-in, global, per channel) | how every graphic type looks | picked per video/cue, by name or keywords; new ones built from screenshots |
 | `vedit guide` / `vedit skill` | how to drive vedit, in small pages | shipped inside vedit, any agent |
-| `youtube-edit` skill | the creator's taste rules + "run `vedit guide`" | guides the model |
+| your skill or prompt | your taste rules + "run `vedit guide`" | guides the model |
 
 ## A video, start to finish (target)
 
 ```
-vedit new <cap-project> --lang ar --dialect iq --style yellow-doodle
+vedit new talk.mp4 --lang en       # or a recorder project an importer plugin reads
 vedit transcribe                 # Studio, cached
 vedit summarize                  # cheap model -> summary.md (chapters, visual moments, ASR errors)
   -> model writes cuts.yaml      #   (vedit propose-cuts drafts one)
@@ -41,7 +46,8 @@ vedit clean [--posted]           # caches; --posted also deletes the originals (
 vedit guide [topic]              # built-in manual: one-screen map, detail per topic on demand
 vedit skill [install]            # agent skill (printed; install writes a pointer only)
 vedit styles [find "<words>"]    # global, channel and built-in packs
-vedit style new|try|fork|compare|pick|save   # build a style from screenshots, the creator picks options
+vedit style new|try|fork|compare|pick|save   # build a style from screenshots, you pick options
+vedit importers [PATH]           # importer plugins for recorder projects
 ```
 
 ## Rules that shape it

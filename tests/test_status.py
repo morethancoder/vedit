@@ -99,25 +99,24 @@ def test_sample_hash(tmp_path):
     assert sample_hash(small) is not None
 
 
-def test_ingest_hash_follows_cap_media_not_the_folder(tmp_path):
-    cap = tmp_path / "X.cap"
-    cap.mkdir()
+def test_ingest_hash_follows_camera_media_not_the_origin_folder(tmp_path):
+    origin_dir = tmp_path / "X.myrec"
+    origin_dir.mkdir()
     real = tmp_path / "real"
     real.mkdir()
     (real / "result.mp4").write_bytes(b"export")
     (real / "camera.mp4").write_bytes(b"camera")
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "A.mp4").symlink_to(real / "result.mp4")
+    (tmp_path / "src" / "A-camera.mp4").symlink_to(real / "camera.mp4")
     (tmp_path / "project.yaml").write_text(
-        f"slug: t\nlang: ar\nsources:\n  A: {{ cap: {cap}, camera: raw }}\n"
+        f"slug: t\nlang: ar\nsources:\n  A: {{ file: src/A.mp4, camera: src/A-camera.mp4, origin: {origin_dir} }}\n"
     )
     proj = Project.load(tmp_path)
     p = proj.paths
-    assert state.current_inputs(proj, p, {})["ingest"] is None  # nothing linked yet
-    p.src.mkdir()
-    (p.src / "A.mp4").symlink_to(real / "result.mp4")
-    (p.src / "A-camera.mp4").symlink_to(real / "camera.mp4")
     h = state.current_inputs(proj, p, {})["ingest"]
     assert h
-    (cap / "junk").write_text("folder changes do not matter")
+    (origin_dir / "junk").write_text("folder changes do not matter")
     assert state.current_inputs(proj, p, {})["ingest"] == h
     (real / "camera.mp4").write_bytes(b"camerb")
     assert state.current_inputs(proj, p, {})["ingest"] != h

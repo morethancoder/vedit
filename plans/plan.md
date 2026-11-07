@@ -34,7 +34,7 @@ formats, pipeline, studio, models, traps, sources).
 ## Children
 
 - [`phase-01-foundation/step.md`](phase-01-foundation/step.md) — package, CLI skeleton, project file, run/Studio helpers, status, built-in guide (others wait on this)
-- [`phase-02-ingest/step.md`](phase-02-ingest/step.md) — `new` from a Cap project, proxies, `transcribe` via Studio, words model
+- [`phase-02-ingest/step.md`](phase-02-ingest/step.md) — `new` from a video or recorder project, proxies, `transcribe` via Studio, words model
 - [`phase-03-cut/step.md`](phase-03-cut/step.md) — `cuts.yaml`, listening refine, incremental program, `joins`, `listen`
 - [`phase-04-graphics/step.md`](phase-04-graphics/step.md) — `cues.yaml` anchored to words, faces, placement, `build`
 - [`phase-05-styles/step.md`](phase-05-styles/step.md) — style pack format, two packs, doodle library, custom cues, style library, style authoring
@@ -44,6 +44,7 @@ formats, pipeline, studio, models, traps, sources).
 - [`phase-09-acceptance/step.md`](phase-09-acceptance/step.md) — rebuild the Telegram video, rewrite the skill
 - [`phase-10-agentic/step.md`](phase-10-agentic/step.md) — command introspection, error codes, dry run, `vedit wait`
 - [`phase-11-formats/step.md`](phase-11-formats/step.md) — clips, shorts, stories, feed posts in every common aspect, clear of platform HUDs
+- [`phase-12-agnostic/step.md`](phase-12-agnostic/step.md) — any video in, importer plugins for recorders, personal defaults only in config
 
 ## Decisions (2026-11-07)
 

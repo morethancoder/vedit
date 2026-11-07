@@ -58,7 +58,7 @@ def test_pack_checks_clean_and_owns_every_v1_type(violet):
     assert packs.check(violet) == []
     own = violet.type_sources()
     assert all(own[t] == "claude-violet" for t in V1), own
-    assert {"spark", "telegram", "octopus"} <= set(violet.logos())
+    assert {"spark", "telegram"} <= set(violet.logos())
     assert all(violet.partials()[n].parent.parent.name == "claude-violet" for n in violet.partials())
 
 

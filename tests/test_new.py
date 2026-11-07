@@ -26,17 +26,18 @@ def new(*args):
     return main(["new", *map(str, args)])
 
 
-def make_cap(root: Path, mirror=False) -> Path:
-    c = root / "Cap X.cap"
-    (c / "output").mkdir(parents=True)
-    (c / "content/segments/segment-0").mkdir(parents=True)
-    shutil.copy(CLIP, c / "content/segments/segment-0/camera.mp4")
-    shutil.copy(CLIP, c / "output/result.mp4")
-    rec = {"camera": {"path": "content/segments/segment-0/camera.mp4", "fps": 25}}
-    (c / "recording-meta.json").write_text(json.dumps({"pretty_name": "Cap X", "segments": [rec]}))
-    seg = {"recordingSegment": 0, "start": 0.0, "end": 2.0}
-    cfg = {"timeline": {"segments": [seg]}, "camera": {"mirror": mirror}}
-    (c / "project-config.json").write_text(json.dumps(cfg))
+def make_rec(root: Path, mirror=False, tracks=1) -> Path:
+    """A recorder project the test importer (conftest FAKE_IMPORTER) reads."""
+    c = root / "Rec X.myrec"
+    c.mkdir(parents=True)
+    cams = []
+    for k in range(tracks):
+        shutil.copy(CLIP, c / f"camera-{k}.mp4")
+        cams.append(f"camera-{k}.mp4")
+    shutil.copy(CLIP, c / "edit.mp4")
+    trims = [[k, 0.0, 2.0] for k in range(tracks)]
+    d = {"name": "Rec X", "video": "edit.mp4", "camera": cams, "trims": trims, "fps": 25, "mirror": mirror}
+    (c / "rec.json").write_text(json.dumps(d))
     return c
 
 
@@ -95,31 +96,66 @@ def test_rerun_redoes_only_missing_and_keeps_project_yaml(tmp_path, capsys):
     assert Project.load(root).lang == "en"
 
 
-def test_cap_folder_builds_cam(tmp_path, capsys):
-    cap = make_cap(tmp_path, mirror=True)
-    assert new(cap, "--dir", tmp_path / "out", "--slug", "t", "--lang", "ar") == 0
+def test_importer_folder_builds_clean_camera(tmp_path, fake_importer, capsys):
+    rec = make_rec(tmp_path, mirror=True)
+    assert new(rec, "--dir", tmp_path / "out", "--slug", "t", "--lang", "ar") == 0
     root = tmp_path / "out" / "t"
     p = Project.load(root)
-    assert p.sources["A"].cap == cap.resolve() and p.sources["A"].camera == "raw"
-    assert (root / "src/A.mp4").resolve() == (cap / "output/result.mp4").resolve()
-    assert (root / "src/A-camera.mp4").resolve().name == "camera.mp4"
+    s = p.sources["A"]
+    assert s.importer == "myrec" and s.origin == rec.resolve() and s.mirror and s.fps == 25
+    assert [(t.track, t.start, t.end) for t in s.trims] == [(0, 0.0, 2.0)]
+    assert (root / "src/A.mp4").resolve() == (rec / "edit.mp4").resolve()
+    assert (root / "src/A-camera.mp4").resolve() == s.camera[0] and s.camera[0].name == "camera-0.mp4"
     m = root / ".vedit/media"
     assert "hflip" in (m / "A-cam.filter").read_text()
     streams = ffprobe_json(m / "A-cam.mp4")["streams"]
     assert {s["codec_type"] for s in streams} == {"video", "audio"}
     assert next(s for s in streams if s["codec_type"] == "video")["r_frame_rate"] == "25/1"
     assert (m / "proxy/A.mp4").is_file() and (m / "A-48k.wav").is_file() and (m / "sheet/A.jpg").is_file()
+    assert "clean camera on 1 trims" in capsys.readouterr().out
 
 
-def test_export_file_maps_to_cap(tmp_path, monkeypatch):
-    (tmp_path / "caps_dir").mkdir()
-    cap = make_cap(tmp_path / "caps_dir")
-    monkeypatch.setattr("vedit.ingest.cap.CAP_RECORDINGS", cap.parent)
-    export = tmp_path / "Cap X.mp4"
-    shutil.copy(CLIP, export)
-    assert new(export, "--dir", tmp_path / "out", "--lang", "ar") == 0
-    p = Project.load(tmp_path / "out" / "cap-x")
-    assert p.sources["A"].cap == cap.resolve()
+def test_two_camera_tracks_link_and_filter(tmp_path, fake_importer):
+    rec = make_rec(tmp_path, tracks=2)
+    assert new(rec, "--dir", tmp_path / "out", "--slug", "t", "--lang", "ar") == 0
+    root = tmp_path / "out" / "t"
+    p = Project.load(root)
+    assert [c.name for c in p.sources["A"].camera] == ["camera-0.mp4", "camera-1.mp4"]
+    assert (root / "src/A-camera-1.mp4").resolve().name == "camera-1.mp4"
+    assert "[1:v]trim" in (root / ".vedit/media/A-cam.filter").read_text()
+
+
+def test_hand_written_camera_source(tmp_path):
+    """No importer: a project.yaml with file + camera (no trims) uses the camera whole with the file's audio."""
+    root = tmp_path / "out" / "t"
+    (root / "src").mkdir(parents=True)
+    shutil.copy(CLIP, root / "src/A.mp4")
+    shutil.copy(CLIP, root / "src/A-camera.mp4")
+    (root / "project.yaml").write_text(
+        "slug: t\nlang: ar\nsources:\n  A: {file: src/A.mp4, camera: src/A-camera.mp4}\n"
+    )
+    p = Project.load(root)
+    plan = media.plan_of(p.sources["A"])
+    assert (
+        plan.camera.fps == media._fps(CLIP) and len(plan.camera.trims) == 1 and plan.camera.trims[0].end > 9
+    )
+    assert p.sources["A"].punch_in
+
+
+def test_folder_without_importer_is_refused(tmp_path, capsys):
+    d = tmp_path / "Some.rec"
+    d.mkdir()
+    assert new(d, "--dir", tmp_path / "out", "--lang", "ar") != 0
+    assert "no importer recognises" in capsys.readouterr().err
+
+
+def test_projects_folder_from_config(tmp_path, cfg, monkeypatch):
+    (cfg / "config.yaml").write_text(f"projects: {tmp_path / 'mine'}\n")
+    f = tmp_path / "x.mp4"
+    shutil.copy(CLIP, f)
+    monkeypatch.chdir(tmp_path)
+    assert new(f, "--lang", "ar") == 0
+    assert (tmp_path / "mine" / "x" / "project.yaml").is_file()
 
 
 def test_channel_defaults(tmp_path, cfg, capsys):

@@ -26,7 +26,7 @@ def run(ns) -> Report:
         root = find_project(override=ns.project)
         project = Project.load(root)
     except ProjectError as e:
-        raise VeditError(str(e), next="vedit new <cap-project>  (or: vedit status --project PATH)") from e
+        raise VeditError(str(e), next="vedit new <video>  (or: vedit status --project PATH)") from e
     paths = project.paths
     status = state.stage_status(project, paths)
     r = Report("status")

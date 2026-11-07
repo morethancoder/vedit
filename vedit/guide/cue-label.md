@@ -16,7 +16,7 @@ A card that names a thing while it is spoken: a logo, a small kicker line and a 
 - type: label
   at: "words that start it"
   near: A 92
-  logo: octopus            # a logo the style pack offers
+  logo: telegram           # a logo the style pack (or your config logos/) offers
   kicker: "small line above"
   title: "the title"
 ```

@@ -7,7 +7,8 @@ Moved from the `youtube-edit` skill. Each one cost real time once; the code shou
 - whisper.cpp looped across splices without `-mc 0`; Studio's qwen3-asr doesn't, but keep splice gaps of 2 s.
 - Whisper rewrote Iraqi Arabic toward formal Arabic, so words didn't match audio and cuts landed wrong.
 - A "filler" cut once dropped a "ما" and flipped the meaning ("I had knowledge"). Join checks compare meaning-bearing words.
-- Cap exports may already be pause-trimmed; Cap C-style exports can mirror the camera and switch layout on the last word.
+- A recorder's export may already be pause-trimmed, mirror the camera or switch layout on the last word; an
+  importer that reads the recorder's project gives vedit the clean camera and trims instead.
 
 ## Shell and tools
 - `npx` swallows stdin in `while read` loops: run every subprocess with stdin closed.

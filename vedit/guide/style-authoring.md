@@ -61,7 +61,7 @@ look at the images (you can see them), the creator picks between options.
    already there is archived, and only with `--yes`.
 9. Use it: `style: <name>` in project.yaml or cues.yaml, then `vedit build`.
 
-Built-in and saved packs can be tried and compared too (`vedit style try yellow-doodle`); a built-in's
+Built-in and saved packs can be tried and compared too (`vedit style try claude-violet`); a built-in's
 specimen goes to `~/.config/vedit/cache/specimens/<name>/`, never into vedit itself. Names resolve drafts,
 then the channel (`--channel`), global, built-in.
 

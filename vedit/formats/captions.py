@@ -83,14 +83,14 @@ def page_html(geo: lay.Geometry, words: list[dict], pauses, pk, accent: str | No
                 f'        tl.set(q("#cw{n}-{k}"), {{ color: "#FFFFFF" }}, {max(x["t1"], x["t0"] + 0.08) - a:.3f});'
             )
     css = f"""
-      .cap {{ position: absolute; left: {cx0:.0f}px; width: {cx1 - cx0:.0f}px; top: {geo.caption_top:.0f}px;
+      .capline {{ position: absolute; left: {cx0:.0f}px; width: {cx1 - cx0:.0f}px; top: {geo.caption_top:.0f}px;
         height: {geo.caption_h:.0f}px; display: flex; align-items: center; justify-content: center; }}
       .pg {{ position: absolute; inset: 0; display: flex; flex-wrap: wrap; align-content: center; justify-content: center;
         gap: 0 0.28em; opacity: 0; text-align: center; font: 800 {lay.CAPTION_PX}px/1.25 {font}; color: #FFFFFF;
         -webkit-text-stroke: 2px rgba(0,0,0,.55); paint-order: stroke fill;
         text-shadow: 0 3px 6px rgba(0,0,0,.6), 0 8px 30px rgba(0,0,0,.45); }}
       .w {{ display: inline-block; }}"""
-    body = f'        <div class="cap">{"".join(divs)}</div>'
+    body = f'        <div class="capline">{"".join(divs)}</div>'
     html = pages.page("captions", pages.font_faces(pk), css, body, "\n".join(lines), (w, h))
     return html.replace("const D = DUR;", f"const D = {b - a:.3f};")
 

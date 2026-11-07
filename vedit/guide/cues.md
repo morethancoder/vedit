@@ -9,7 +9,7 @@ Status: built. `vedit build` places every cue, writes the HyperFrames project an
 ## Shape
 
 ```yaml
-style: yellow-doodle              # default style for every cue; a cue may override with style:
+style: base                       # default style for every cue; a cue may override with style:
 cues:
   - type: label
     at: "words that start it"     # the phrase to find, spoken

@@ -63,7 +63,7 @@ end: last-word                    # fade to black from the last word
 - Boundary priority per cut: pin, then the listened (refined) boundary, then the quietest 10 ms within
   0.12 s of the word time. Pauses over `pauses.max` shrink to `pauses.keep`. Pieces sit on a 1/30 s grid.
 - Output: `.vedit/edl/edl.json` (pieces, holds, total, fade_start) and `.vedit/edl/cuts.json` (the
-  resolved cuts and problems). Camera (`cap:`) sources punch in 1.07x on alternate jump cuts: `zoom` on a piece.
+  resolved cuts and problems). Camera sources (and `punch: true` ones) punch in 1.07x on alternate jump cuts: `zoom` on a piece.
 - Render: `.vedit/program/proxy.mp4` (1080p30, from the proxy) every run; with `--master` also
   `.vedit/program/master.mp4` (4K60 HEVC, from the camera file; slow, ask for it when the cut is final).
   Each edl piece is its own file in `.vedit/program/pieces/<hash>.mp4` (frame-exact, VideoToolbox); the hash

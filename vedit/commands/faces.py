@@ -22,7 +22,7 @@ def run(ns) -> Report:
     try:
         project = Project.load(find_project(override=ns.project))
     except ProjectError as e:
-        raise VeditError(str(e), next="vedit new <cap-project>  (or: vedit faces --project PATH)") from e
+        raise VeditError(str(e), next="vedit new <video>  (or: vedit faces --project PATH)") from e
     paths = project.paths
     clips = list(project.sources)
     r = Report("faces")

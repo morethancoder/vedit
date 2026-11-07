@@ -9,15 +9,14 @@ from pathlib import Path
 import yaml
 
 from vedit import channel as chan
-from vedit import state
-from vedit.ingest import cap as capmod
-from vedit.ingest.media import SourcePlan, ingest_media
+from vedit import importers, state
+from vedit.ingest.media import ingest_media, plan_of
 from vedit.project import Paths, Project
+from vedit.recording import Recording
 from vedit.report import Report, VeditError
 from vedit.run import ffprobe_duration, log_path
 
-EPILOG = "example: vedit new <cap-project> --lang ar --dialect iq --style yellow-doodle"
-DEFAULT_PARENT = "~/Demos"
+EPILOG = "example: vedit new talk.mp4 --lang en"
 
 CUTS_TEMPLATE = """\
 # cuts.yaml: what to remove or mark. Written by you after reading the transcript. `vedit guide cuts`.
@@ -42,7 +41,7 @@ chapters: []
 CUES_TEMPLATE = """\
 # cues.yaml: graphics anchored to spoken words. `vedit guide cues`.
 #
-# style: yellow-doodle          # default for every cue
+# style: base                   # default for every cue
 # cues:
 #   - type: label
 #     at: "words spoken"
@@ -53,14 +52,16 @@ cues: []
 
 def add_args(sp) -> None:
     sp.add_argument("inputs", nargs="+", metavar="input", help=argparse.SUPPRESS)
-    sp.usage = "vedit new <cap|export|video>... [options]"
+    sp.usage = "vedit new <video|recording>... [options]"
     sp.add_argument("--slug", help="folder name (default: from the input)")
     sp.add_argument("--lang", choices=project_langs(), metavar="ar|en", help="spoken language")
     sp.add_argument("--dialect", metavar="D", help="ar dialect: iq, gulf, lev, eg, ma, msa")
     sp.add_argument("--style", metavar="S", help="style pack (default: from channel/config)")
     sp.add_argument("--channel", metavar="H", help="channel handle (default: config.yaml)")
     sp.add_argument("--hint", metavar="TEXT", help="names to favour in transcription")
-    sp.add_argument("--dir", default=DEFAULT_PARENT, metavar="PARENT", help="parent folder (~/Demos)")
+    sp.add_argument(
+        "--dir", metavar="PARENT", help="parent folder (default: config.yaml `projects:`, else here)"
+    )
     sp.epilog = EPILOG
 
 
@@ -81,36 +82,38 @@ def _in_git_tree(path: Path) -> Path | None:
     return None
 
 
-def _classify(inputs: list[str]) -> tuple[capmod.CapProject | None, list[Path], str]:
-    """(cap, files, slug base). A cap project has `files == [export]`."""
+def _classify(inputs: list[str]) -> tuple[list[tuple[Path, Recording | None, str | None]], str]:
+    """Each input as (path, what an importer read or None for a plain video, importer name); and the slug base."""
     paths = [Path(i).expanduser().resolve() for i in inputs]
     for p in paths:
         if not p.exists():
-            raise VeditError(f"{p} does not exist", next="vedit new <cap-project-or-video> ...")
-    first = paths[0]
-    if first.is_dir():
-        if len(paths) > 1:
-            raise VeditError("a .cap folder is a whole project: pass it alone", next="vedit new <cap>")
-        cap = capmod.read_cap(first)
-        if cap.export is None:
-            raise VeditError(
-                f"{cap.path} has no exported video (output/result.mp4)",
-                next="export it in Cap, then rerun vedit new",
-            )
-        return cap, [cap.export], slugify(cap.pretty_name)
-    if len(paths) == 1:
-        try:
-            cap = capmod.read_cap(capmod.find_cap_for_export(first))
-        except capmod.CapError:
-            cap = None
-        if cap is not None:
-            return cap, [first], slugify(first.stem)
-    for p in paths:
-        if not p.is_file():
-            raise VeditError(f"{p} is not a video file")
+            raise VeditError(f"{p} does not exist", next="vedit new <video> ...")
     if len(paths) > len(string.ascii_uppercase):
         raise VeditError("too many sources (max 26)")
-    return None, paths, slugify(first.stem)
+    out: list[tuple[Path, Recording | None, str | None]] = []
+    for p in paths:
+        hit = importers.recognise(p)
+        if hit:
+            imp, rec = hit
+            if not Path(rec.video).is_file():
+                raise VeditError(
+                    f"{imp.name} importer: {p} has no edited video yet", next="export it, then rerun"
+                )
+            out.append((Path(rec.video).resolve(), rec, imp.name))
+        elif p.is_file():
+            out.append((p, None, None))
+        else:
+            raise VeditError(
+                f"{p} is a folder no importer recognises",
+                next="pass the video file, or add an importer for this recorder (vedit guide importers)",
+            )
+    first = out[0]
+    return out, slugify(first[1].name if first[1] else first[0].stem)
+
+
+def _parent(ns) -> Path:
+    d = ns.dir or chan.load_config().get("projects")
+    return Path(d).expanduser().resolve() if d else Path.cwd()
 
 
 def _link(link: Path, target: Path) -> None:
@@ -134,7 +137,7 @@ def _resolve_settings(ns, r: Report) -> dict:
     if not lang:
         raise VeditError(
             "no language: pass --lang ar|en or set `lang:` in the channel's channel.yaml",
-            next="vedit new <input> --lang ar --dialect iq",
+            next="vedit new <input> --lang en",
         )
     same_lang = not ch.get("lang") or ch["lang"] == lang
     dialect = ns.dialect or (ch.get("dialect") if same_lang else None)
@@ -149,7 +152,8 @@ def _write_project(root: Path, slug: str, cfg: dict, sources: dict) -> None:
             data[k] = cfg[k]
     data["sources"] = sources
     (root / "project.yaml").write_text(
-        yaml.safe_dump(data, sort_keys=False, allow_unicode=True), encoding="utf-8"
+        yaml.safe_dump(data, sort_keys=False, allow_unicode=True, default_flow_style=None, width=120),
+        encoding="utf-8",
     )
 
 
@@ -163,15 +167,15 @@ def _warn_differences(project: Project, cfg: dict, r: Report) -> None:
 
 def run(ns) -> Report:
     r = Report("new")
-    cap, files, base = _classify(ns.inputs)
+    inputs, base = _classify(ns.inputs)
     cfg = _resolve_settings(ns, r)
     slug = ns.slug or base
-    parent = Path(ns.dir).expanduser().resolve()
+    parent = _parent(ns)
     root = parent / slug
     if (hit := _in_git_tree(root)) is not None:
         raise VeditError(
             f"{root} is inside a git work tree ({hit}): projects never live in a code repo",
-            next="vedit new <input> --dir ~/Demos",
+            next="vedit new <input> --dir <folder outside the repo>",
         )
     paths = Paths(root)
     existed = paths.project_yaml.is_file()
@@ -181,17 +185,26 @@ def run(ns) -> Report:
     paths.ensure()
 
     sources: dict = {}
-    plans: list[SourcePlan] = []
-    for i, f in enumerate(files):
+    for i, (f, rec, imp) in enumerate(inputs):
         name = string.ascii_uppercase[i]
-        if cap is not None:
-            _link(paths.src / f"{name}{f.suffix}", f)
-            _link(paths.src / f"{name}-camera{cap.camera.suffix}", cap.camera)
-            sources[name] = {"cap": str(cap.path), "camera": "raw"}
-        else:
-            _link(paths.src / f"{name}{f.suffix}", f)
-            sources[name] = {"file": f"src/{name}{f.suffix}"}
-        plans.append(SourcePlan(name, file=f, cap=cap))
+        _link(paths.src / f"{name}{f.suffix}", f)
+        spec: dict = {"file": f"src/{name}{f.suffix}"}
+        if rec is not None and rec.camera is not None:
+            cams = []
+            for k, c in enumerate(rec.camera.tracks):
+                link = paths.src / f"{name}-camera{'' if k == 0 else f'-{k}'}{c.suffix}"
+                _link(link, c)
+                cams.append(f"src/{link.name}")
+            spec["camera"] = cams[0] if len(cams) == 1 else cams
+            spec["trims"] = [[t.track, t.start, t.end] for t in rec.camera.trims]
+            spec["fps"] = rec.camera.fps
+            if rec.camera.mirror:
+                spec["mirror"] = True
+        if rec is not None:
+            if rec.origin:
+                spec["origin"] = str(rec.origin)
+            spec["importer"] = imp
+        sources[name] = spec
 
     if existed:
         project = Project.load(root)
@@ -204,6 +217,7 @@ def run(ns) -> Report:
         project = Project.load(root)
 
     t0 = time.monotonic()
+    plans = [plan_of(s) for s in project.sources.values()]
     try:
         outputs, built, warns = ingest_media(paths, plans, log_path(root, "new"))
     except VeditError as e:
@@ -225,15 +239,14 @@ def run(ns) -> Report:
     for p in plans:
         d = ffprobe_duration(p.file)
         durations[p.name] = round(d, 2)
-        r.info(
-            f"source {p.name}: {p.file.name}  {d:.1f}s" + ("  (cap: raw camera on Cap trims)" if cap else "")
-        )
+        how = f"  (clean camera on {len(p.camera.trims)} trims)" if p.camera else ""
+        r.info(f"source {p.name}: {p.file.name}  {d:.1f}s{how}")
     r.info(
         f"media: {len(built)} built, {len(outputs) - len(built)} already done  ({time.monotonic() - t0:.0f}s)"
     )
     r.data = {
         "project": str(root),
-        "sources": {n: str(s.get("cap") or root / s["file"]) for n, s in sources.items()},
+        "sources": {n: str(s.origin or s.file) for n, s in project.sources.items()},
         "durations": durations,
         "outputs": [str(o) for o in outputs],
         "built": built,

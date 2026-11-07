@@ -7,20 +7,22 @@ next: vedit transcribe
 ## vedit new
 
 ```
-vedit new <input>... [--slug S] [--lang ar|en] [--dialect iq] [--style S] [--channel H] [--hint TEXT] [--dir PARENT]
+vedit new <input>... [--slug S] [--lang ar|en] [--dialect D] [--style S] [--channel H] [--hint TEXT] [--dir PARENT]
 ```
 
-`<input>` is a `.cap` folder, a Cap export (matched to its `.cap`), or one or more plain video files (sources
-A, B, C...). The project goes in `<PARENT>/<slug>/` (`~/Demos` by default); never inside a git repo.
+`<input>` is one or more video files (sources A, B, C...), or a recorder project one of your importer plugins
+reads (`vedit guide importers`). The project goes in `<PARENT>/<slug>/`: `--dir`, else config.yaml's `projects:`,
+else the current folder; never inside a git repo.
 
 It writes:
 
 - `project.yaml`: slug, lang, dialect, channel, hint, sources. `style` and `accent` are written only when you
   pass them; otherwise they come from the channel, then `~/.config/vedit/config.yaml`, at run time.
-- `src/`: symlinks to the originals (Cap: `A.mp4` export, `A-camera.mp4` raw camera). Originals are never touched.
+- `src/`: symlinks to the originals (`A.mp4`; `A-camera.*` when an importer found a clean camera). Originals are
+  never touched.
 - `cuts.yaml`, `cues.yaml`: empty templates with commented examples. `custom/`: for your own HTML.
-- `.vedit/media/`: `A-cam.mp4` (Cap only: raw camera on Cap's trims with the export audio, mirrored when Cap
-  mirrors), `proxy/<clip>.mp4` (1080p30), `<clip>-48k.wav` (48 kHz stereo), `sheet/<clip>.jpg` (4x4 contact sheet).
+- `.vedit/media/`: `A-cam.mp4` (camera sources only: the clean camera laid on its trims with the video's audio,
+  mirrored when the source says so), `proxy/<clip>.mp4` (1080p30), `<clip>-48k.wav` (48 kHz stereo), `sheet/<clip>.jpg` (4x4 contact sheet).
 
 Language: `--lang` or the channel's `lang` is required. Unpassed lang, dialect and hint come from the channel
 (`vedit guide channels`). `--channel` defaults to config.yaml's `channel`.

@@ -50,8 +50,8 @@ tiles:
     type: chapter
     dur: 4
     fields:
-      ar: {title: "النمو", kicker: "الفصل الثاني", logo: octopus}
-      en: {title: "Growth", kicker: "chapter two", logo: octopus}
+      ar: {title: "النمو", kicker: "الفصل الثاني", logo: telegram}
+      en: {title: "Growth", kicker: "chapter two", logo: telegram}
   - id: doodle
     type: doodle
     dur: 5

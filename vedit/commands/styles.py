@@ -18,7 +18,7 @@ from vedit.graphics import stylefind
 from vedit.project import ProjectError, find_project
 from vedit.report import Report, VeditError
 
-EPILOG = 'example: vedit styles find "warm doodle arabic"   |   vedit styles show yellow-doodle'
+EPILOG = 'example: vedit styles find "warm doodle arabic"   |   vedit styles show base'
 
 
 def add_args(sp) -> None:
@@ -36,7 +36,7 @@ def channel_of(ns) -> str | None:
     if ns.channel:
         if not HANDLE.match(ns.channel):
             raise VeditError(
-                f"--channel {ns.channel!r} must be letters, digits, . _ - (e.g. ali-talks)", exit=2
+                f"--channel {ns.channel!r} must be letters, digits, . _ - (e.g. my-channel)", exit=2
             )
         return ns.channel
     try:

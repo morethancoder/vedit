@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Export HEAD as a scrubbed tree for the public repo: no personal data, one commit, noreply author.
-# Usage: scripts/public.sh <out-dir>   (the dir is recreated; push it with scripts/public.sh's printed command)
+# Usage: scripts/public.sh <out-dir>   (the dir is recreated). Publishing goes through scripts/publish.sh.
 set -euo pipefail
 source "$(dirname "$0")/_lib.sh"
 
@@ -12,7 +12,7 @@ git -C "$root" archive HEAD | tar -x -C "$out"
 
 step "drop private material"
 # workflow-compare session records, the earlier projects' source, the clip of the creator's face and voice
-rm -rf "$out/.workflow-compare" "$out/reference" "$out"/tests/fixtures/clip-ar-10s.*
+rm -rf "$out/.workflow-compare" "$out/reference" "$out/.claude" "$out"/tests/fixtures/clip-ar-10s.*
 
 printf '\n# generated stand-in for the unpublished speech clip (tests/conftest.py)\ntests/fixtures/clip-ar-10s.*\n' >> "$out/.gitignore"
 
@@ -53,24 +53,7 @@ for f in root.rglob("*"):
         f.write_text(new, encoding="utf-8")
         n += 1
 print(f"  scrubbed {n} files")
-
-# check: nothing personal left (home folder name, email and its local part, name words)
-needles = [Path(home).name, *([email, email.split("@")[0]] if email else []), *terms]
-bad = []
-for f in root.rglob("*"):
-    if not f.is_file() or f.name == "uv.lock":
-        continue
-    try:
-        text = f.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        continue
-    low = text.lower()
-    hits = [x for x in needles if x and x.lower() in low]
-    hits += [w for w in names if re.search(r"\b" + re.escape(w) + r"\b", text)]
-    if hits:
-        bad.append(f"{f.relative_to(root)}: {len(hits)} hit(s)")
-if bad:
-    print("\n".join(bad))
-    sys.exit(1)
 PY
-ok "clean: no name, home path or email left"
+step "check: nothing personal left"
+python3 "$root/scripts/public_check.py" "$out" || die "personal data in the export (above): nothing was published"
+ok "clean: no name, home path, email, secret or recording"

@@ -7,7 +7,7 @@ description: Edit a talk recording into a finished YouTube video with the vedit 
 vedit is a CLI. It does the mechanics (transcribe, cut, build, render) and prints short reports. You make the
 creative calls by writing small files. vedit never judges the look: you and the user do.
 
-Use it when a recording (Cap project or video) must become an edited video, or the user wants graphics,
+Use it when a recording (any video) must become an edited video, or the user wants graphics,
 subtitles or a new graphics style. Not for one-off ffmpeg tasks or videos without a talking head.
 
 ## Workflow

@@ -15,9 +15,9 @@ plug/plug.yaml      plug preset for this channel (+ the files it names)
 
 ## Commands
 
-- `vedit channel add <handle> --style yellow-doodle --lang ar --accent '#FFD60A'` creates the channel, or
+- `vedit channel add <handle> --style base --lang en --accent '#3B82F6'` creates the channel, or
   changes only the flags you pass on an existing one. Flags: `--style`, `--lang`, `--dialect`, `--accent`
-  (a hex colour), `--logos telegram,octopus`, `--hint`. A `--style` that does not resolve for the channel is an
+  (a hex colour), `--logos telegram,mylogo`, `--hint`. A `--style` that does not resolve for the channel is an
   error naming the places searched.
 - `vedit channel show <handle>` prints its defaults, its own packs and its plug preset. Without a handle it
   shows the default channel (`channel:` in config.yaml), or lists every channel.

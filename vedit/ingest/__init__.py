@@ -1,1 +1,1 @@
-"""Ingest: read source projects (Cap) and build a vedit project from them."""
+"""Ingest: build a project's media (camera, proxies, WAV, contact sheets) from its sources."""

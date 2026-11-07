@@ -67,17 +67,17 @@ def mock_sheet(video: Path, platforms: list[str], dst: Path, n: int = 6) -> Path
     import cv2
     import numpy as np
 
-    cap = cv2.VideoCapture(str(video))
-    frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) or 1
+    vid = cv2.VideoCapture(str(video))
+    frames = int(vid.get(cv2.CAP_PROP_FRAME_COUNT)) or 1
     tiles = []
     for k in range(n):
-        cap.set(cv2.CAP_PROP_POS_FRAMES, int(frames * (k + 0.5) / n))
-        ok, img = cap.read()
+        vid.set(cv2.CAP_PROP_POS_FRAMES, int(frames * (k + 0.5) / n))
+        ok, img = vid.read()
         if not ok:
             continue
         m = mock(img, platforms)
         tiles.append(cv2.resize(m, (360, round(360 * m.shape[0] / m.shape[1]))))
-    cap.release()
+    vid.release()
     if not tiles:
         raise ValueError(f"no frames read from {video}")
     cv2.imwrite(str(dst), np.hstack(tiles), [cv2.IMWRITE_JPEG_QUALITY, 85])

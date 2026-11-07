@@ -1,7 +1,7 @@
 # yellow-doodle: the Telegram video's look (T tools/build.py). Numbers are T's, tuned by eye and ear.
 # Types label, chip, kinetic, big-number, chapter, screen, plug, doodle are T's (types/); doodle line style and
 # lettering are in doodle.yaml (T doodles.py: ivory lines, yellow accent, Aref Ruqaa / Caveat).
-# Marks: logos telegram, octopus and spark live in base (the names cues use, recoloured per pack by th.spark / th.octo); here spark is yellow and spins.
+# Marks: logos telegram and spark live in base (the names cues use, recoloured per pack by th.spark / th.octo); here spark is yellow and spins.
 # Sounds: the mp3 files stay in base (shared, neutral clicks/whooshes any pack can map); this pack owns T's map.
 name: yellow-doodle
 extends: base

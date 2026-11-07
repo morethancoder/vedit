@@ -13,7 +13,9 @@ vedit/
   run.py            subprocess helpers: timeout + nice, ffmpeg VideoToolbox presets, no stdin (</dev/null)
   studio.py         thin client over `studio --json …` (transcribe, cutout, judge), job waiting, caching
   llm.py            model router + prompt files (prompts/*.md)
-  ingest/           cap.py (Cap project reader, trims), media.py (A-cam, proxies, audio)
+  ingest/           media.py (A-cam from a clean camera on its trims, proxies, audio)
+  recording.py      Recording/Camera/Trim: what importer plugins return
+  importers.py      loads importer plugins from <config>/importers/
   words/            transcript model, Arabic normalisation, source<->program time
   cut/              cuts.yaml loader, refine (listening), edl, program render (incremental), joins report
   graphics/         cues loader, anchors, placement (faces, side, theme, fit-in-shot), hosts, index.html
@@ -33,7 +35,7 @@ prompts/            summary.md, propose-cuts.md, join-check.md, subs.md
 ```
 ~/Demos/<slug>/
   project.yaml      language, dialect, style, sources, accent overrides, pinned versions
-  src/              links to the originals (Cap export, raw camera, screen recordings)
+  src/              links to the originals (edited video, clean camera tracks, screen recordings)
   summary.md        cheap-model summary of the transcript
   cuts.yaml         the cut (creative, model-edited)
   cues.yaml         the graphics (creative, model-edited)

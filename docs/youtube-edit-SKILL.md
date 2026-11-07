@@ -1,10 +1,10 @@
 ---
 name: youtube-edit
 description: >
-  the creator's (morethancoder) YouTube edit taste: turn his Cap talk recordings (+ screen recordings, product demos) into
+  the creator's (morethancoder) YouTube edit taste: turn his talk recordings (+ screen recordings, product demos) into
   one cleaned-up, motion-designed video with Arabic + English SRT subtitles, then a 4K60 render on approval, using the
   `vedit` CLI. Use whenever the creator says "edit this video for YouTube", "make the YouTube edit", "cut this talk", "add
-  motion graphics / doodles / captions to my video", drops Cap exports or screen recordings in a folder, or asks to
+  motion graphics / doodles / captions to my video", drops recordings or screen recordings in a folder, or asks to
   change/redo a video made this way. It holds his taste; vedit holds the mechanics.
 ---
 

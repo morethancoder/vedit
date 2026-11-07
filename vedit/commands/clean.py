@@ -1,12 +1,10 @@
 """vedit clean: free disk without losing the edit. `--posted` also removes renders, media and the originals."""
 
-import json
 import os
 import shutil
 from pathlib import Path
 
-from vedit import state
-from vedit.ingest.cap import CAP_RECORDINGS, DEFAULT_SEARCH, EXPORT_EXTS, _search_dirs
+from vedit import importers, state
 from vedit.project import Project, ProjectError, find_project
 from vedit.report import Report, VeditError, confirm
 
@@ -63,53 +61,6 @@ def _inside(path: Path, parent: Path) -> bool:
         return False
 
 
-def cap_pretty_name(cap: Path) -> str | None:
-    try:
-        name = json.loads((cap / "recording-meta.json").read_text(encoding="utf-8")).get("pretty_name")
-    except (OSError, ValueError, AttributeError):
-        return None
-    return str(name) if name else None
-
-
-def _cap_root(p: Path) -> Path | None:
-    p = p.resolve()
-    for c in (p, *p.parents):
-        if c.suffix == ".cap" and c.is_dir():
-            return c
-    return None
-
-
-def find_caps(project: Project, recordings: Path = CAP_RECORDINGS) -> list[Path]:
-    """The .cap folders behind the project's cap sources: the one project.yaml names, plus any .cap in the
-    Cap recordings folder whose recording-meta.json `pretty_name` is the same."""
-    found: dict[Path, None] = {}
-    for s in project.sources.values():
-        if not s.cap:
-            continue
-        root = _cap_root(s.cap)
-        if root is None:
-            continue
-        found[root] = None
-        name = cap_pretty_name(root)
-        if name and recordings.is_dir():
-            for c in sorted(recordings.glob("*.cap")):
-                if c.is_dir() and c.resolve() != root and cap_pretty_name(c) == name:
-                    found[c.resolve()] = None
-    return list(found)
-
-
-def find_exports(project: Project, caps: list[Path], search=DEFAULT_SEARCH) -> list[Path]:
-    """Cap exports (`<pretty_name>.mp4` in the search dirs) and src/ links to files outside the .cap folders."""
-    out: dict[Path, None] = {}
-    names = {n for c in caps if (n := cap_pretty_name(c))}
-    for d in _search_dirs(search):
-        for n in names:
-            for ext in EXPORT_EXTS:
-                if (d / f"{n}{ext}").is_file():
-                    out[(d / f"{n}{ext}").resolve()] = None
-    return [p for p in out if not any(_inside(p, c) for c in caps)]
-
-
 def always_targets(paths) -> list[tuple[Path, str]]:
     v = paths.vedit
     t: list[tuple[Path, str]] = [
@@ -135,22 +86,37 @@ def posted_targets(paths) -> list[tuple[Path, str]]:
     return [(p, why) for p, why in t if p.exists()]
 
 
-def original_targets(
-    project: Project, recordings: Path = CAP_RECORDINGS
-) -> tuple[list[tuple[Path, str]], list[Path]]:
-    """(originals to delete, exports that are APFS clones and free nothing)."""
+def original_targets(project: Project) -> tuple[list[tuple[Path, str]], list[Path]]:
+    """(originals to delete with why, files kept). A source's recorder project (`origin`) is listed by its
+    importer's `originals()` when it has one, else as itself; edited videos outside it are kept (often clones
+    that free nothing). Plain `file:`/`camera:` sources outside the project are listed."""
     root = project.root
-    out: list[tuple[Path, str]] = []
-    caps = find_caps(project, recordings)
-    for c in caps:
-        out.append((c, f"Cap original (.cap, pretty_name '{cap_pretty_name(c)}')"))
+    out: dict[Path, str] = {}
+    kept: dict[Path, None] = {}
     for s in project.sources.values():
-        if s.file:
-            f = s.file.resolve()
+        origin = s.origin.resolve() if s.origin and s.origin.exists() else None
+        if s.origin is not None:
+            imp = importers.get(s.importer)
+            got = imp.originals(s.origin) if imp else None
+            if got is not None:
+                dele, keep = got
+                out.update({Path(p).resolve(): why for p, why in dele})
+                kept.update({Path(p).resolve(): None for p in keep})
+            elif origin:
+                out[origin] = f"recording project of source {s.name}" + (
+                    f" ({s.importer})" if s.importer else ""
+                )
+        for f in (s.file, *s.camera):
+            f = f.resolve()
             if f == root or _inside(root, f) or (_inside(f, root) and not _inside(f, project.paths.src)):
                 continue  # never the project folder or its kept files
-            out.append((f, f"source file {s.name}"))
-    return out, find_exports(project, caps)
+            if origin and _inside(f, origin):
+                continue  # goes with its recording project
+            if s.origin is not None:
+                kept[f] = None
+            else:
+                out[f] = f"source file {s.name}"
+    return list(out.items()), [k for k in kept if k not in out]
 
 
 def delete(path: Path) -> None:
@@ -207,7 +173,7 @@ def run(ns) -> Report:
         for x in rows:
             r.info(f"  {human(x['bytes']):>9}  {x['path']}  ({x['why']})")
         for e in clones:
-            r.info(f"  {'~0':>9}  {e}  (Cap export, APFS clone, frees ~0, kept)")
+            r.info(f"  {'~0':>9}  {e}  (edited video outside the recording project, kept)")
         r.info("sizes are allocated bytes; APFS clones share blocks, so freed space can be smaller")
     if ns.dry_run:
         r.ok_(f"dry run: nothing deleted ({human(total)} would be listed)")

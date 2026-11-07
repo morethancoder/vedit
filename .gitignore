@@ -7,6 +7,10 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .public/
+.public-stage/
+.public-venv/
+.claude/worktrees/
+.claude/scheduled_tasks.lock
 
 # generated stand-in for the unpublished speech clip (tests/conftest.py)
 tests/fixtures/clip-ar-10s.*

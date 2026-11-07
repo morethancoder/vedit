@@ -23,7 +23,7 @@ from vedit.render.hf import render_cmd
 from vedit.report import Report, VeditError
 from vedit.run import run as sh
 
-EPILOG = "example: vedit doodle preview flood --style yellow-doodle"
+EPILOG = "example: vedit doodle preview flood --style base"
 BEAT_GAP = 1.7  # seconds between evenly spaced beats in a preview
 TAIL = 3.0  # seconds after the last beat: the evenly spaced beats end there (spec.resolve_beats)
 
@@ -31,7 +31,7 @@ TAIL = 3.0  # seconds after the last beat: the evenly spaced beats end there (sp
 def add_args(sp) -> None:
     sp.add_argument("action", choices=["list", "preview"], help="list the library, or preview one scene")
     sp.add_argument("scene", nargs="?", help="library scene name, or a .yaml file holding an inline spec")
-    sp.add_argument("--style", metavar="PACK", help="style pack (default: project's, else yellow-doodle)")
+    sp.add_argument("--style", metavar="PACK", help="style pack (default: project's, config's, else base)")
     sp.add_argument("--lang", metavar="LANG", help="short-form row direction (default: project's, else ar)")
     sp.epilog = EPILOG
 
@@ -132,7 +132,9 @@ def run(ns) -> Report:
         project = _project(ns.project)
     except ProjectError as e:
         raise VeditError(str(e), next="vedit doodle preview <scene>  (outside a project is fine too)") from e
-    style = ns.style or (chan.style_choice(project)[0] if project else "yellow-doodle")
+    style = ns.style or (
+        chan.style_choice(project)[0] if project else chan.load_config().get("style") or "base"
+    )
     pk = packs.load(style)
     probs = packs.check(pk)
     if probs:

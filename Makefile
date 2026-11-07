@@ -1,7 +1,7 @@
 # One-word lowercase targets, `help` first. See the makefile-standards skill.
 
 .DEFAULT_GOAL := help
-.PHONY: help test lint fmt install clean public
+.PHONY: help test lint fmt install clean public publish guard
 
 help: ## show this help
 	@awk 'BEGIN {FS = ":.*?## "; printf "\n\033[1mUsage:\033[0m make \033[36m<target>\033[0m\n\n\033[1mTargets:\033[0m\n"} \
@@ -25,5 +25,11 @@ install: ## install vedit on PATH (editable)
 clean: ## remove caches and build output, print what was freed
 	@bash scripts/clean.sh
 
-public: ## export a scrubbed single-commit tree for the public repo (no personal data)
-	@bash scripts/public.sh $${OUT:-.public}
+public: ## export a scrubbed, checked tree to OUT (default .public-stage) without publishing
+	@bash scripts/public.sh $${OUT:-.public-stage}
+
+publish: ## the only way to publish: export, test, check, push to the public repo (MSG="what changed")
+	@bash scripts/publish.sh
+
+guard: ## install the git hooks that refuse private pushes and re-check public ones
+	@bash scripts/guard.sh

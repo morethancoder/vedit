@@ -1,7 +1,8 @@
 # base: the neutral fallback every pack extends. Same layouts, slots and motion skeleton as the shipped packs
 # (so a pack can extend it and only restyle), in a quiet palette: ivory text, a cool grey accent, no hand
 # lettering. Arabic and Latin both set (IBM Plex Sans Arabic carries Latin too; JetBrains Mono for code).
-# Marks telegram, octopus, spark live here so every pack accepts the same cues; their fills come from the theme.
+# Marks telegram and spark live here so every pack accepts the same cues; their fills come from the theme.
+# Your own logos go in ~/.config/vedit/logos/ (or a channel's logos/), never in a pack.
 # Sounds live here too (neutral clicks/whooshes, sfx/CREDITS.md); packs map them in `sfx:` with their own gains.
 name: base
 summary: neutral fallback; plain ivory text, quiet grey accent, every v1 type

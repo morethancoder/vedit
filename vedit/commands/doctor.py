@@ -134,7 +134,7 @@ def run_doctor(ns) -> Report:
     if not r.ok:
         r.next = "fix the lines marked failed, then vedit doctor"
     elif root is None:
-        r.next = "vedit new <cap-project>  (or cd into a project and run vedit status)"
+        r.next = "vedit new <video>  (or cd into a project and run vedit status)"
     else:
         r.next = "vedit status"
     return r

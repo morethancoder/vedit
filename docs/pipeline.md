@@ -4,11 +4,10 @@ Moved from the `youtube-edit` skill (steps 1–11). These are settled decisions:
 
 ## new: ingest
 - ffprobe every source; one contact sheet per source.
-- **Cap projects:** use the raw camera from the `.cap` project, laid on Cap's own timeline trims
-  (`project-config.json` → `timeline.segments`), with the export's cleaned audio. Frame counts per segment come
-  from the cumulative export clock (no drift). Cap's export is 16:10 and crops the mic; the raw camera is 16:9.
-  Source: `tele-a7/scripts/source.sh`.
-- Cap exports can be pause-trimmed already, can mirror the camera, and switch layout on the last word.
+- **Camera sources** (`camera:` + `trims:`, usually from an importer plugin): the clean camera laid on the trims,
+  with the edited video's audio. Frame counts per trim come from the cumulative edit clock (no drift). A
+  recorder's export may be cropped, pause-trimmed or mirrored; the clean camera is not. Source:
+  `tele-a7/scripts/source.sh`.
 - 1080p30 VideoToolbox proxies of every source; 48 kHz stereo WAV of the audio.
 
 ## transcribe
@@ -121,7 +120,7 @@ Moved from the `youtube-edit` skill (steps 1–11). These are settled decisions:
 
 ## clean
 - Always: frame caches, render chunks, scratch audio/video in `.vedit/`.
-- `--posted` (after the creator confirms the upload): renders, proxies, program, cut-outs, and the originals behind `src/`.
-  **Cap exports in `~/Movies/YT/<video>/` are APFS clones** of `<project>.cap/output/result.mp4`: deleting them
-  frees nothing. The real originals are the `.cap` folders, matched by `recording-meta.json` `pretty_name`.
+- `--posted` (after the upload is confirmed): renders, proxies, program, cut-outs, and the originals behind `src/`:
+  plain source files, and for importer sources the recorder project (the importer's `originals()` may add
+  twins and name exports to keep; exports are often APFS clones that free nothing).
   Keep cuts.yaml, cues.yaml, custom/, youtube/, subs, transcripts. Report GB freed.

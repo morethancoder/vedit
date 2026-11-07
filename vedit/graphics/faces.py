@@ -1,7 +1,7 @@
 """Face track: where his face is every quarter second, so graphics keep off it.
 
 Each source clip's 1080p proxy (`.vedit/media/proxy/<clip>.mp4`) is sampled at 4 fps with OpenCV Haar
-(frontal face, largest one wins). Boxes are `[x, y, w, h]` in 1920x1080 px. Ingest already bakes Cap's
+(frontal face, largest one wins). Boxes are `[x, y, w, h]` in 1920x1080 px. Ingest already bakes the source's
 camera mirror into the A-cam and the proxy, so boxes are in display coordinates; the cache key hashes the
 proxy file, so a different mirror state (a rebuilt proxy) is a different key.
 

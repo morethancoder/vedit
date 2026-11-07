@@ -33,7 +33,7 @@ def _load(ns):
     try:
         project = Project.load(find_project(override=ns.project))
     except ProjectError as e:
-        raise VeditError(str(e), next="vedit new <cap-project>  (or: vedit review --project PATH)") from e
+        raise VeditError(str(e), next="vedit new <video>  (or: vedit review --project PATH)") from e
     paths = project.paths
     edl_f = paths.edl / "edl.json"
     if not edl_f.is_file():
@@ -51,22 +51,22 @@ def face_box(track: FaceTrack | None, zooms, t: float):
     return fl.zoomed(fl.xywh_to_box(row["box"]), zoom_at(zooms, t))
 
 
-def judge(cap, track) -> list[dict]:
+def judge(snap, track) -> list[dict]:
     """One row per graphic in time order: peak, sheet/cell, flags, texts, marks to draw."""
     rows = []
-    for i, h in enumerate(cap.hosts):
-        t = cap.peaks.get(h.id, h.start)
+    for i, h in enumerate(snap.hosts):
+        t = snap.peaks.get(h.id, h.start)
         snum, cell = sheet.where(i)
-        tl = cap.timelines.get(h.id) or {}
+        tl = snap.timelines.get(h.id) or {}
         flags: list[fl.Flag] = []
         d = fl.drawing_flag(tl.get("tweens") or [], h.dur)
         if d:
             flags.append(d)
-        texts = cap.texts.get(h.id)
-        shot = cap.shots.get(h.id)
+        texts = snap.texts.get(h.id)
+        shot = snap.shots.get(h.id)
         # full-frame scenes cover the blurred A-roll; big words sit behind the cut-out by design
         on_footage = h.track not in SCENE_TRACKS and h.track != BEHIND_TRACK
-        fb = face_box(track, cap.zooms, t) if on_footage else None
+        fb = face_box(track, snap.zooms, t) if on_footage else None
         rgb = None
         if shot is not None:
             img = cv2.imread(str(shot))
@@ -137,12 +137,12 @@ def run(ns) -> Report:
     project, paths, edl = _load(ns)
     review = Path(paths.vedit) / "review"
     log = log_path(paths.root, "review")
-    cap = capture(Path(paths.hf), review, log, force=ns.force)
+    snap = capture(Path(paths.hf), review, log, force=ns.force)
     try:
         track = FaceTrack.load(paths, list(project.sources), edl)
     except VeditError:
         track = None
-    rows = judge(cap, track)
+    rows = judge(snap, track)
     files = sheet.write(rows, review, project.slug or paths.root.name)
     for r_ in rows:
         r_["sheet"] = str(files[r_["sheet_no"] - 1])
@@ -153,7 +153,7 @@ def run(ns) -> Report:
     unmeasured = [x["id"] for x in rows if not x["measured"]]
     r.ok_(
         f"{len(rows)} graphics at their peak on {len(files)} sheet(s) in {review} "
-        f"(snapshots {'cached' if cap.cache_hit else 'taken'}); {len(flagged)} flagged"
+        f"(snapshots {'cached' if snap.cache_hit else 'taken'}); {len(flagged)} flagged"
     )
     if track is None:
         r.warn("no face track: the face check was skipped (run: vedit faces)")
@@ -167,7 +167,7 @@ def run(ns) -> Report:
     cues = [{k: v for k, v in x.items() if k not in ("marks", "sheet_no")} for x in rows]
     data = {
         "sheets": [str(f) for f in files],
-        "cache_hit": cap.cache_hit,
+        "cache_hit": snap.cache_hit,
         "flagged": len(flagged),
         "cues": cues,
         "report": str(report_f),

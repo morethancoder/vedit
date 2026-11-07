@@ -1,4 +1,4 @@
-"""Ingest media: A-cam (raw camera on Cap trims), proxies, 48 kHz WAV, contact sheets.
+"""Ingest media: A-cam (clean camera on its trims), proxies, 48 kHz WAV, contact sheets.
 
 Every output is made under a temp name and renamed, and recorded in `.vedit/media/manifest.json` as
 output -> input hash (source path + size + params). An output is redone only when missing or its hash changed.
@@ -10,9 +10,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from vedit.ingest.cap import CapProject, segment_filter
 from vedit.project import Paths
-from vedit.report import VeditError
+from vedit.recording import Camera, Trim, trims_filter
 from vedit.run import DECODE, FF, enc_h264, ffprobe_json, hash_of, proxy_1080p30, run, wav48k
 
 SHEET_COLS, SHEET_ROWS, SHEET_TILE_W = 4, 4, 480
@@ -22,12 +21,33 @@ PARAMS = {"cam": "q75-g50-v1", "proxy": "1080p30-8M-v1", "wav": "48k-stereo-v1",
 @dataclass
 class SourcePlan:
     name: str
-    file: Path | None = None  # plain video file, or the export when `cap` is set
-    cap: CapProject | None = None
+    file: Path  # the edited video: its audio is the source's audio
+    camera: Camera | None = None  # clean camera laid on its trims, when the recorder kept one
 
     @property
     def audio(self) -> Path:
-        return self.file  # type: ignore[return-value]  # export for a Cap source, the file otherwise
+        return self.file
+
+
+def _fps(path: Path) -> int:
+    for st in ffprobe_json(path).get("streams", []):
+        if st.get("codec_type") == "video":
+            n, _, d = str(st.get("avg_frame_rate") or st.get("r_frame_rate") or "30/1").partition("/")
+            return max(1, round(float(n) / float(d or 1))) if float(d or 1) else 30
+    return 30
+
+
+def plan_of(s) -> SourcePlan:
+    """A project.yaml source as an ingest plan. Paths are resolved (links followed) so hashes name real files.
+    A camera without trims is used whole; a camera without fps uses its own frame rate."""
+    f = Path(s.file).resolve()
+    if not s.camera:
+        return SourcePlan(s.name, f)
+    tracks = [Path(c).resolve() for c in s.camera]
+    trims = s.trims or [Trim(0, 0.0, float(ffprobe_json(tracks[0])["format"]["duration"]))]
+    cam = Camera(tracks, trims, s.fps or _fps(tracks[0]), s.mirror)
+    cam.check(f"sources.{s.name}")
+    return SourcePlan(s.name, f, cam)
 
 
 def _size(p: Path) -> int:
@@ -71,24 +91,22 @@ def ensure(manifest: Manifest, out: Path, key: str, in_hash: str, make: Callable
     return True
 
 
-def cam_filter(cap: CapProject) -> str:
-    f = segment_filter(cap.segments, cap.camera_fps)
-    if cap.mirror:
+def cam_filter(cam: Camera) -> str:
+    f = trims_filter(cam.trims, cam.fps)
+    if cam.mirror:
         f = f[: -len("[v]")] + "[vc];[vc]hflip[v]"
     return f
 
 
-def make_cam(cap: CapProject, export: Path, script: Path, dst: Path, log: Path) -> None:
-    """Port of T source.sh: raw camera(s) -> filter script -> Cap's export audio, copied."""
-    idx = sorted(cap.cameras)
-    if idx != list(range(len(idx))):
-        raise VeditError(f"{cap.path}: camera recording segments {idx} are not 0..n-1; unsupported")
-    script.write_text(cam_filter(cap), encoding="utf-8")
+def make_cam(cam: Camera, video: Path, script: Path, dst: Path, log: Path) -> None:
+    """Clean camera track(s) -> laid on the trims -> the edited video's audio, copied (port of T source.sh)."""
+    script.write_text(cam_filter(cam), encoding="utf-8")
     cmd = [*FF, *DECODE]
-    for i in idx:
-        cmd += ["-i", str(cap.cameras[i])]
-    cmd += ["-i", str(export), "-filter_complex_script", str(script), "-map", "[v]", "-map", f"{len(idx)}:a"]
-    cmd += ["-r", str(cap.camera_fps), *enc_h264(quality=75, gop=50)]
+    for c in cam.tracks:
+        cmd += ["-i", str(c)]
+    n = len(cam.tracks)
+    cmd += ["-i", str(video), "-filter_complex_script", str(script), "-map", "[v]", "-map", f"{n}:a"]
+    cmd += ["-r", str(cam.fps), *enc_h264(quality=75, gop=50)]
     cmd += ["-c:a", "copy", "-movflags", "+faststart", str(dst)]
     run(cmd, 3600, log=log)
 
@@ -122,16 +140,16 @@ def ingest_media(paths: Paths, plans: list[SourcePlan], log: Path) -> tuple[list
             built.append(out.relative_to(m).as_posix())
 
     for p in plans:
-        cap, f = p.cap, p.file
-        if cap is not None:
-            cams = [[str(c), _size(c)] for _, c in sorted(cap.cameras.items())]
-            segs = [[s.recording_segment, s.start, s.end] for s in cap.segments]
-            cam_hash = hash_of(PARAMS["cam"], cams, [str(f), _size(f)], segs, cap.camera_fps, cap.mirror)
+        cam, f = p.camera, p.file
+        if cam is not None:
+            cams = [[str(c), _size(c)] for c in cam.tracks]
+            segs = [[t.track, t.start, t.end] for t in cam.trims]
+            cam_hash = hash_of(PARAMS["cam"], cams, [str(f), _size(f)], segs, cam.fps, cam.mirror)
             vid = m / f"{p.name}-cam.mp4"
             step(
                 vid,
                 cam_hash,
-                lambda t, cap=cap, f=f, p=p: make_cam(cap, f, m / f"{p.name}-cam.filter", t, log),
+                lambda t, cam=cam, f=f, p=p: make_cam(cam, f, m / f"{p.name}-cam.filter", t, log),
             )
         else:
             vid = f

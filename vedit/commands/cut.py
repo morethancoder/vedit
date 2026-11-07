@@ -47,7 +47,7 @@ def _find(ns) -> tuple[Path, Project]:
         root = find_project(override=ns.project)
         return root, Project.load(root)
     except ProjectError as e:
-        raise VeditError(str(e), next="vedit new <cap-project>  (or: vedit cut --project PATH)") from e
+        raise VeditError(str(e), next="vedit new <video>  (or: vedit cut --project PATH)") from e
 
 
 def _spawn(ns, root: Path, paths: Paths) -> int:
@@ -194,7 +194,7 @@ def _run(ns, project: Project, paths: Paths, r: Report, child: bool) -> None:
     # 3. edl
     step("edl")
     envs = {n: get_envelope(paths, n, w) for n, w in wavs.items()}
-    zoom = {n for n, s in project.sources.items() if s.cap is not None}
+    zoom = {n for n, s in project.sources.items() if s.punch_in}
     data, info = edl.build(
         cuts,
         refined,

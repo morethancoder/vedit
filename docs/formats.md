@@ -7,19 +7,29 @@ These are the only files the model writes during an edit. Proposals; phase 01 fi
 ```yaml
 slug: tele-a7-growth-story
 lang: ar            # ar | en
-dialect: iq         # Studio --dialect (iq, gulf, lev, eg, ma, msa); omit for en
-channel: ali-talks    # optional; ~/.config/vedit/channels/<handle>/ (default from config.yaml)
-style: yellow-doodle  # optional when the channel has a default
+dialect: gulf       # Studio --dialect (iq, gulf, lev, eg, ma, msa); omit for en
+channel: my-channel   # optional; ~/.config/vedit/channels/<handle>/ (default from config.yaml)
+style: base           # optional when the channel has a default
 accent: "#FFD60A"   # optional override of the pack's accent
-hint: "PowerTeleBot, MCP, Telegram"   # names Studio transcription should favour
+hint: "Acme, MCP, Telegram"           # names Studio transcription should favour
 sources:
-  A: { cap: "~/Library/Application Support/so.cap.desktop/recordings/<project>.cap", camera: raw }
+  A: { file: src/A.mp4 }               # any video
+  C:                                   # a clean camera behind an edit (written by an importer, or by hand)
+    file: src/C.mp4                    # the edited video: audio and timing
+    camera: src/C-camera.mov           # or a list, one file per track
+    trims: [[0, 1.5, 62.0], [0, 70.2, 180.4]]   # [track, start, end]; omit to use the camera whole
+    fps: 30                            # optional: default the camera's own
+    mirror: false
+    origin: ~/Recordings/talk.rec      # the recorder project (vedit clean --posted)
+    importer: myrec                    # the importer plugin that read it
+    punch: true                        # punch-ins on jump cuts (default: on for camera sources)
   B: { file: src/screen-1.mov }        # screen recordings, demos
-logos: [telegram, octopus, spark]
-plug: powertelebot                     # product plug preset (phone demo + URL click)
+logos: [telegram, spark]             # plus your own in ~/.config/vedit/logos/
+plug: myproduct                       # product plug preset (phone demo + URL click)
 ```
 
-Required: `slug`, `lang`, `sources`. Every source has exactly one of `file` or `cap` (plus optional `camera`);
+Required: `slug`, `lang`, `sources`. Every source has `file`; `camera`, `trims`, `fps`, `mirror`, `origin`,
+`importer`, `punch` are optional (`vedit guide importers`);
 relative paths start at the project folder, `~` expands, and a missing path is an error. Unknown keys are errors
 (with a closest-key suggestion). Durations are never stored: they come from ffprobe.
 
@@ -77,7 +87,7 @@ cues:
   - type: label
     at: "فتحت قناتي"
     near: A 92
-    logo: octopus
+    logo: telegram
     kicker: "قبل ٤ سنين"
     title: "فتحت قناتي على يوتيوب"
   - type: big-number                   # word behind the head, person cut-out over it

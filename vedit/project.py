@@ -9,6 +9,8 @@ from pathlib import Path
 
 import yaml
 
+from vedit.recording import Trim
+
 PROJECT_FILE = "project.yaml"
 LANGS = ("ar", "en")
 KEYS = {
@@ -25,7 +27,7 @@ KEYS = {
     "outputs",
 }
 REQUIRED = ("slug", "lang", "sources")
-SOURCE_KEYS = {"file", "cap", "camera"}
+SOURCE_KEYS = {"file", "camera", "trims", "fps", "mirror", "origin", "importer", "punch"}
 OUTPUT_KINDS = ("master", "clip", "short", "story", "post")
 OUTPUT_KEYS = {"id", "kind", "aspect", "platforms", "range", "captions"}
 RANGE_KEYS = {"from", "to", "near"}
@@ -43,14 +45,28 @@ class ProjectError(Exception):
 
 @dataclass
 class Source:
+    """One recording. `file` is the edited video (picture and audio). `camera` (optional) is a clean camera
+    recording, laid on `trims` ([track, start, end] in seconds, end to end = the edit) with `file`'s audio.
+    `origin`/`importer`: the recorder project it came from and the importer plugin that read it."""
+
     name: str
-    file: Path | None = None
-    cap: Path | None = None
-    camera: str | None = None
+    file: Path
+    camera: list[Path] = field(default_factory=list)
+    trims: list[Trim] | None = None
+    fps: int | None = None
+    mirror: bool = False
+    origin: Path | None = None
+    importer: str | None = None
+    punch: bool | None = None
 
     @property
     def path(self) -> Path:
-        return self.cap or self.file  # type: ignore[return-value]
+        return self.file
+
+    @property
+    def punch_in(self) -> bool:
+        """Punch in on alternate jump cuts: on for camera sources unless `punch: false`; `punch: true` for others."""
+        return self.punch if self.punch is not None else bool(self.camera)
 
 
 @dataclass
@@ -142,10 +158,10 @@ def parse_outputs(raw, fname: Path | str) -> list[Output]:
             raise ProjectError(
                 f"{fname}: {where}.range is only for clips and stories (a {kind} uses the whole cut)."
             )
-        cap = spec.get("captions", "srt" if kind == "master" else "burned")
-        if cap not in CAPTIONS:
-            raise ProjectError(f"{fname}: {where}.captions is '{cap}'; use one of: {', '.join(CAPTIONS)}.")
-        out.append(Output(oid, kind, aspect, list(plats), rng, cap))
+        caps = spec.get("captions", "srt" if kind == "master" else "burned")
+        if caps not in CAPTIONS:
+            raise ProjectError(f"{fname}: {where}.captions is '{caps}'; use one of: {', '.join(CAPTIONS)}.")
+        out.append(Output(oid, kind, aspect, list(plats), rng, caps))
     return out
 
 
@@ -274,6 +290,71 @@ def _str(where: str, data: dict, key: str, fname: Path) -> str | None:
     return v
 
 
+def _path(f: Path, where: str, v, root: Path) -> Path:
+    if not isinstance(v, str) or not v:
+        raise ProjectError(f"{f}: {where} must be a path string.")
+    p = _resolve(v, root)
+    if not p.exists():
+        raise ProjectError(
+            f"{f}: {where} points to {p}, which does not exist. Fix the path (relative paths start at the project folder)."
+        )
+    return p
+
+
+def _source(name: str, spec, f: Path, root: Path) -> Source:
+    where = f"sources.{name}"
+    if not isinstance(spec, dict):
+        raise ProjectError(f"{f}: {where} must be a mapping like {{ file: src/A.mp4 }}.")
+    for k in spec:
+        if k not in SOURCE_KEYS:
+            raise ProjectError(f"{f}: unknown key '{k}' in {where}.{_suggest(k, SOURCE_KEYS)}")
+    if "file" not in spec:
+        raise ProjectError(f"{f}: {where} needs 'file' (the edited video).")
+    src = Source(name=name, file=_path(f, f"{where}.file", spec["file"], root))
+    cam = spec.get("camera")
+    if cam is not None:
+        cams = [cam] if isinstance(cam, str) else cam
+        if not isinstance(cams, list) or not cams:
+            raise ProjectError(f"{f}: {where}.camera must be a path or a list of paths (one per track).")
+        src.camera = [_path(f, f"{where}.camera", c, root) for c in cams]
+    if spec.get("trims") is not None:
+        if not src.camera:
+            raise ProjectError(
+                f"{f}: {where}.trims needs a camera: they say which parts of it make the edit."
+            )
+        trims = spec["trims"]
+        ok = isinstance(trims, list) and trims and all(
+            isinstance(t, list) and len(t) == 3 and isinstance(t[0], int)
+            and all(isinstance(x, (int, float)) for x in t[1:]) and t[2] > t[1]
+            for t in trims
+        )  # fmt: skip
+        if not ok:
+            raise ProjectError(
+                f"{f}: {where}.trims must be a list of [track, start, end] (seconds, end > start)."
+            )
+        if any(not 0 <= t[0] < len(src.camera) for t in trims):
+            raise ProjectError(f"{f}: {where}.trims names a track with no camera file (tracks count from 0).")
+        src.trims = [Trim(int(t[0]), float(t[1]), float(t[2])) for t in trims]
+    fps = spec.get("fps")
+    if fps is not None and (not isinstance(fps, int) or isinstance(fps, bool) or fps <= 0):
+        raise ProjectError(f"{f}: {where}.fps must be a whole number of frames per second.")
+    src.fps = fps
+    for k in ("mirror", "punch"):
+        if spec.get(k) is not None and not isinstance(spec[k], bool):
+            raise ProjectError(f"{f}: {where}.{k} must be true or false.")
+    src.mirror = bool(spec.get("mirror", False))
+    src.punch = spec.get("punch")
+    if spec.get("origin") is not None:
+        o = spec["origin"]
+        if not isinstance(o, str) or not o:
+            raise ProjectError(f"{f}: {where}.origin must be a path string.")
+        src.origin = _resolve(o, root)  # may be gone after a clean; only `clean` reads it
+    if spec.get("importer") is not None and not isinstance(spec["importer"], str):
+        raise ProjectError(f"{f}: {where}.importer must be an importer name.")
+    src.importer = spec.get("importer")
+    return src
+
+
 def _resolve(raw: str, root: Path) -> Path:
     p = Path(raw).expanduser()
     return p if p.is_absolute() else (root / p).resolve()
@@ -283,7 +364,7 @@ def load_project(root: Path) -> Project:
     root = root.expanduser().resolve()
     f = root / PROJECT_FILE
     if not f.is_file():
-        raise ProjectError(f"{f}: file not found. Run vedit new <cap-project> or pass --project PATH.")
+        raise ProjectError(f"{f}: file not found. Run vedit new <video> or pass --project PATH.")
     try:
         data = yaml.safe_load(f.read_text(encoding="utf-8"))
     except yaml.YAMLError as e:
@@ -309,38 +390,14 @@ def load_project(root: Path) -> Project:
         raise ProjectError(f"{f}: 'lang' is '{lang}'; use one of: {', '.join(LANGS)}.")
     logos = data.get("logos") or []
     if not isinstance(logos, list) or not all(isinstance(x, str) for x in logos):
-        raise ProjectError(f"{f}: 'logos' must be a list of names, e.g. [telegram, octopus].")
+        raise ProjectError(f"{f}: 'logos' must be a list of names, e.g. [telegram, mylogo].")
 
     raw_sources = data["sources"]
     if not isinstance(raw_sources, dict):
         raise ProjectError(f"{f}: 'sources' must be a mapping like A: {{ file: src/a.mov }}.")
     sources: dict[str, Source] = {}
     for name, spec in raw_sources.items():
-        name = str(name)
-        if not isinstance(spec, dict):
-            raise ProjectError(f"{f}: sources.{name} must be a mapping with 'file' or 'cap'.")
-        for k in spec:
-            if k not in SOURCE_KEYS:
-                raise ProjectError(f"{f}: unknown key '{k}' in sources.{name}.{_suggest(k, SOURCE_KEYS)}")
-        if ("file" in spec) == ("cap" in spec):
-            raise ProjectError(f"{f}: sources.{name} needs exactly one of 'file' or 'cap'.")
-        src = Source(name=name)
-        for k in ("file", "cap"):
-            if k in spec:
-                if not isinstance(spec[k], str) or not spec[k]:
-                    raise ProjectError(f"{f}: sources.{name}.{k} must be a path string.")
-                p = _resolve(spec[k], root)
-                if not p.exists():
-                    raise ProjectError(
-                        f"{f}: sources.{name}.{k} points to {p}, which does not exist. "
-                        f"Fix the path (relative paths start at the project folder)."
-                    )
-                setattr(src, k, p)
-        cam = spec.get("camera")
-        if cam is not None and not isinstance(cam, str):
-            raise ProjectError(f"{f}: sources.{name}.camera must be a string (e.g. raw).")
-        src.camera = cam
-        sources[name] = src
+        sources[str(name)] = _source(str(name), spec, f, root)
 
     return Project(
         root=root,
@@ -372,5 +429,5 @@ def find_project(start: Path | None = None, override: str | None = None) -> Path
         if (d / PROJECT_FILE).is_file():
             return d
     raise ProjectError(
-        f"no {PROJECT_FILE} found from {cwd} up — run vedit new <cap-project> or pass --project PATH"
+        f"no {PROJECT_FILE} found from {cwd} up — run vedit new <video> or pass --project PATH"
     )

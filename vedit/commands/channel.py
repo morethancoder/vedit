@@ -17,7 +17,7 @@ from vedit.commands.new import project_langs
 from vedit.graphics import pack as packs
 from vedit.report import Report, VeditError
 
-EPILOG = "example: vedit channel add ali-talks --style yellow-doodle --lang ar --accent '#FFD60A'"
+EPILOG = "example: vedit channel add my-channel --style base --lang en --accent '#3B82F6'"
 HANDLE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 HEX = re.compile(r"^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$")
 
@@ -54,7 +54,7 @@ def add(ns) -> Report:
     h = ns.handle
     if not h or not HANDLE.match(h):
         raise VeditError(
-            f"channel handle {h!r} must be letters, digits, . _ - (e.g. ali-talks)",
+            f"channel handle {h!r} must be letters, digits, . _ - (e.g. my-channel)",
             next="vedit channel add <handle> --style <name> --lang ar",
             exit=2,
         )

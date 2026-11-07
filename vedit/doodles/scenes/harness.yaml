@@ -1,0 +1,23 @@
+# C tools/doodles.py _harness: my own server runs the Claude session inside a harness I built, which can call
+# any Telegram Bot API method
+about: a server running Claude inside my own harness, calling any Bot API method
+lang: en
+beats:
+  server:
+    - {pen: 1.1, shapes: [{rack: {at: [630, 575]}}]}
+  claude:
+    - pen: 0.6
+      shapes: [{spark: {at: [630, 655], R: 62}}]
+      spin: {about: [630, 655], rate: 5, after: 0.6}
+  harness:
+    - {pen: 1.1, shapes: [{oval: {at: [630, 575], rx: 250, ry: 262, start: -2.5, color: accent, lw: 1.1, double: true, amp: 2.4}}]}
+    - {text: "my harness", at: [630, 261], after: 0.8, size: 66, color: soft}
+  methods:
+    - {pen: 0.5, shapes: [{arrow: {a: [845.9447797481316, 409.1737474919198], b: [1062, 330], bend: 19.6, size: 22}}]}
+    - {text: "sendMessage", at: [1090, 330], after: 0.3, size: 60, anchor: start}
+    - {pen: 0.5, after: 0.32, shapes: [{arrow: {a: [885.6180370470565, 490.87495944943885], b: [1062, 470], bend: 8.4, size: 22}}]}
+    - {text: "sendPhoto", at: [1090, 470], after: 0.62, size: 60, anchor: start}
+    - {pen: 0.5, after: 0.64, shapes: [{arrow: {a: [896.5347546768648, 604.2392604011187], b: [1062, 610], bend: -2.8000000000000003, size: 22}}]}
+    - {text: "createChatInviteLink", at: [1090, 610], after: 0.94, size: 60, anchor: start}
+    - {pen: 0.5, after: 0.96, shapes: [{arrow: {a: [867.2866379605689, 705.1534917171778], b: [1062, 750], bend: -14.0, size: 22, color: soft}}]}
+    - {text: "…any method", at: [1090, 750], after: 1.26, size: 56, anchor: start, color: soft}

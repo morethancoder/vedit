@@ -1,0 +1,34 @@
+<!-- vedit
+slots:
+  label: {required: true, help: "small line above the code"}
+  code: {required: true, help: "the text typed out, character by character (Arabic: word by word)"}
+  logo: {kind: logo}
+-->
+<style>
+      /* C chip: a small spark-led label, then the command typed after a lilac prompt with a block cursor */
+      .wrap { position: absolute; {{#left}}left{{/left}}{{#right}}right{{/right}}: 150px; bottom: 118px; display: flex; }
+      .chip { position: relative; display: flex; flex-direction: column; gap: 10px; {{#right}}align-items: flex-end;{{/right}} }
+      .label { display: flex; align-items: center; gap: 12px; font: 500 22px/1.2 {{&font.text}}; color: {{th.kicker}}; text-shadow: {{&th.shadow}}; }
+      .label[dir="rtl"] { font-size: 24px; line-height: 1.35; }
+      .label .logo { width: 24px; height: 24px; }
+      .code { font: 400 36px/1.25 {{&font.mono}}; color: {{th.code}}; white-space: pre; display: flex; align-items: center; text-shadow: {{&th.shadow}}; }
+      .code.rtl { font: 500 36px/1.4 {{&font.text}}; }
+      .prompt { color: {{th.prompt}}; margin-inline-end: 16px; font-family: {{&font.mono}}; }
+      .cursor { display: block; width: 15px; height: 38px; background: {{th.prompt}}; margin-inline-start: 4px; }
+{{#blur}}{{&part.blur_css}}{{/blur}}
+</style>
+        <div class="wrap">{{#blur}}<div class="blurbg"></div>{{/blur}}<div class="chip">
+          <div class="label" dir="{{dir}}">{{&logo.html}}<span>{{label}}</span></div>
+          <div class="code{{#code_rtl}} rtl{{/code_rtl}}" dir="{{#code_rtl}}rtl{{/code_rtl}}{{^code_rtl}}ltr{{/code_rtl}}"><span class="prompt">›</span>{{#toks}}<span class="ch">{{.}}</span>{{/toks}}<span class="cursor"></span></div>
+        </div></div>
+<script>
+        // typed character by character (C: 35 ms) or word by word (Arabic), the whole line within 1.3 s
+        const n = {{n_toks}};
+        const step = Math.min({{#code_rtl}}0.16{{/code_rtl}}{{^code_rtl}}0.035{{/code_rtl}}, 1.3 / Math.max(n, 1));
+        const blinks = Math.max(0, Math.floor((D - 2.2) / 1.0) - 1);
+        tl.fromTo(q(".chip"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "{{m.ease_in}}" }, 0.05);
+        tl.fromTo(qa(".ch"), { opacity: 0 }, { opacity: 1, duration: 0.01, stagger: step }, 0.45);
+        tl.fromTo(q(".cursor"), { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "steps(1)", repeat: blinks * 2 + 1, yoyo: true }, 0.5 + n * step);
+        tl.to(q(".chip"), { opacity: 0, y: -12, duration: {{m.out}}, ease: "{{m.ease_out}}" }, D - {{m.out_lead}});
+{{#blur}}{{&part.blur_motion}}{{/blur}}
+</script>

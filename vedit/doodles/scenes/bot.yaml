@@ -1,0 +1,31 @@
+# C tools/doodles.py _bot: a bot is a small program that runs 24/7, one workflow, and you chat with it
+about: a small program (window + gear) running 24/7 on one workflow, chatting through a phone
+lang: en
+beats:
+  program:
+    - {pen: 0.9, shapes: [{window: {at: [640, 300], w: 440, h: 330}}]}
+    - {pen: 0.7, after: 0.6, name: gear, shapes: [{gear: {at: [860, 488], R: 62}}]}
+    - {text: "small program", at: [860, 700], after: 1.0, size: 60}
+  always:
+    - {pen: 1.0, shapes: [{clock: {at: [425, 455], R: 88}}]}
+    - {text: "24/7", at: [425, 608], after: 0.6, size: 72}
+  workflow:
+    - pen: 0.9
+      shapes: [{arc_arrow: {at: [860, 488], rx: 112, ry: 105.28, a0: -50, a1: 245, color: soft, size: 24}}]
+      spin: {of: gear, about: [860, 488], rate: 14, after: 0.9}
+    - {text: "one workflow", at: [860, 236], after: 0.5, size: 56, color: soft}
+  chat:
+    - {pen: 0.7, shapes: [{phone: {at: [1480, 470], w: 230, h: 410}}]}
+    - {pen: 0.4, after: 0.45, shapes: [{telegram: {at: [1480, 348], R: 38}}]}
+    - pen: 0.8
+      after: 0.75
+      shapes:
+        - bubble: {at: [1392, 406], w: 122, h: 46, side: left, lw: 0.9}
+        - bubble: {at: [1454, 484], w: 112, h: 46, side: right, fill: true, lw: 0.9}
+        - bubble: {at: [1392, 562], w: 134, h: 46, side: left, lw: 0.9}
+    - pen: 0.7
+      after: 0.3
+      shapes:
+        - arrow: {a: [1108, 452], b: [1332, 452], bend: 14, size: 22}
+        - arrow: {a: [1332, 528], b: [1108, 528], bend: 14, size: 22}
+    - {text: "you chat with it", at: [1480, 740], after: 1.1, size: 56}

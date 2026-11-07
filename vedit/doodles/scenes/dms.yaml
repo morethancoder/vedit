@@ -1,0 +1,29 @@
+# T tools/doodles_tele.py _dms: people messaged me privately from all over: small businesses, creators, paid work
+about: a phone full of DMs from small businesses and content creators, paid work
+lang: ar
+beats:
+  phone:
+    - {pen: 0.9, float: 4, shapes: [{phone: {at: [960, 485], w: 280, h: 470}}]}
+    - {text: "راسلوني على الخاص", at: [960, 790], after: 0.5, size: 58}
+  bubbles:
+    - pen: 1.0
+      shapes:
+        - bubble: {at: [845, 300], w: 190, h: 50, side: left, lw: 0.85}
+        - bubble: {at: [865, 392], w: 190, h: 50, side: right, fill: true, lw: 0.85}
+        - bubble: {at: [845, 484], w: 190, h: 50, side: left, lw: 0.85}
+        - bubble: {at: [865, 576], w: 190, h: 50, side: right, fill: true, lw: 0.85}
+    - {text: "من كل الوطن العربي", at: [960, 865], after: 0.6, size: 46, color: soft}
+  business:
+    - {pen: 1.0, shapes: [{shop: {at: [1500, 470], w: 250}}]}
+    - {text: "أعمال صغيرة", at: [1500, 700], after: 0.6, size: 58}
+  creators:
+    - pen: 1.0
+      shapes:
+        - rect: {at: [300, 380], w: 300, h: 200, r: 22, fill: 0.18}
+        - line: {pts: [[380, 604], [520, 604]], amp: 0.5}
+        - play: {at: [450, 480], k: 90}
+    - {text: "صنّاع محتوى", at: [450, 700], after: 0.6, size: 58}
+  paid:
+    - {pen: 0.8, shapes: [{coin: {at: [1090, 200], R: 52}}]}
+    - {text: "$", at: [1090, 202], after: 0.5, size: 64, color: accent}
+    - {text: "شغل مدفوع", at: [850, 200], after: 0.6, size: 60, color: accent}

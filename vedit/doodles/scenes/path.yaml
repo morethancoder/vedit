@@ -1,0 +1,46 @@
+# T tools/doodles_tele.py _path: civil engineering (not my passion) -> programming -> freelance engineer -> skills
+about: civil engineering, then code, then freelance software engineer with UI/UX/front/back skills
+lang: ar
+beats:
+  civil:
+    - pen: 1.1
+      shapes:
+        - hardhat: {at: [1500, 395], w: 150}
+        - line: {pts: [[1365, 530], [1635, 530]]}
+        - arc: {at: [1500, 530], rx: 105, ry: 75, a0: 180, a1: 360, amp: 1.2, bow: 0}
+        - line: {pts: [[1448, 467.84320324582166], [1448, 530]], lw: 0.8, amp: 0.3}
+        - line: {pts: [[1500, 458], [1500, 530]], lw: 0.8, amp: 0.3}
+        - line: {pts: [[1552, 467.84320324582166], [1552, 530]], lw: 0.8, amp: 0.3}
+        - line: {pts: [[1400, 530], [1400, 610]]}
+        - line: {pts: [[1600, 530], [1600, 610]]}
+        - line: {pts: [[1350, 610], [1650, 610]], color: soft, amp: 1.4}
+    - {text: "هندسة مدنية", at: [1500, 705], after: 0.6, size: 62}
+    - {text: "مو شغفي", at: [1500, 785], after: 1.0, size: 46, color: soft}
+  code:
+    - pen: 0.5
+      shapes:
+        - arrow: {a: [1330, 500], b: [1140, 500], size: 24}
+    - pen: 1.0
+      after: 0.3
+      float: 4
+      shapes:
+        - laptop: {at: [880, 480], w: 340, prompt: false, fill: true}
+    - {text: "</>", at: [880, 480], after: 0.9, size: 70, mono: true, color: accent}
+    - {text: "البرمجة", at: [880, 700], after: 0.9, size: 62}
+  freelance:
+    - pen: 1.1
+      float: 4
+      shapes:
+        - person: {at: [380, 320], size: 120, fill: true}
+        - laptop: {at: [380, 470], w: 230, prompt: false}
+    - {text: "مهندس برمجيات", at: [380, 640], after: 0.6, size: 58}
+    - {text: "Freelance", at: [380, 710], after: 1.0, size: 64, color: accent}
+  skills:
+    - {pen: 0.5, shapes: [{tag: {at: [285, 805], w: 214, h: 64}}]}
+    - {text: "UI", at: [295, 805], after: 0.25, size: 44, color: accent}
+    - {pen: 0.5, after: 0.28, shapes: [{tag: {at: [525, 805], w: 214, h: 64}}]}
+    - {text: "UX", at: [535, 805], after: 0.53, size: 44, color: accent}
+    - {pen: 0.5, after: 0.56, shapes: [{tag: {at: [285, 895], w: 214, h: 64}}]}
+    - {text: "Front-end", at: [295, 895], after: 0.81, size: 44, color: accent}
+    - {pen: 0.5, after: 0.84, shapes: [{tag: {at: [525, 895], w: 214, h: 64}}]}
+    - {text: "Back-end", at: [535, 895], after: 1.09, size: 44, color: accent}

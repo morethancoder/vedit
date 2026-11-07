@@ -1,0 +1,16 @@
+# yellow-doodle doodles: T tools/doodles.py's look. Chalky ivory lines, bright yellow fills and highlights (the
+# pack accent, so a channel accent follows), light yellow secondary labels, warm red for errors. Arabic lettering in
+# Aref Ruqaa (everyday handwriting, set 0.92x), Latin in Caveat, code in JetBrains Mono.
+stroke: "#FAF9F5"
+accent: accent        # T VIOLET = #FFD60A
+soft: "#FFE45C"       # T LILAC
+warn: "#FF7A59"       # T WARM
+width: 4.6            # T SW, px at 1920x1080
+wobble: 1.0
+lettering:
+  latin: '"Caveat", cursive'
+  arabic: '"Aref Ruqaa", serif'
+  mono: '"JetBrains Mono", monospace'
+  arabic_scale: 0.92
+shadow: "0 2px 14px rgba(8, 8, 6, 0.6)"
+motion: {pen: power1.inOut, fill: sine.inOut, label: power2.out, out: power1.in}

@@ -1,0 +1,22 @@
+# C tools/doodles.py _botapi: Claude talks to the Telegram Bot API, which posts to a channel or a group
+about: Claude -> Bot API -> automated posts to a channel and a group
+lang: en
+beats:
+  claude:
+    - {pen: 1.1, float: 4, shapes: [{bot: {at: [460, 520], w: 236, h: 206, face: spark, fill: true}}]}
+    - {text: "Claude", at: [460, 715], after: 0.9, size: 64}
+  api:
+    - pen: 0.8
+      shapes:
+        - arrow: {a: [602, 520], b: [732, 520], size: 22}
+        - rect: {at: [756, 446], w: 300, h: 148, r: 26, double: true, fill: 0.22}
+    - {text: "Bot API", at: [906, 520], after: 0.55, size: 72}
+  channel:
+    - {pen: 0.45, shapes: [{arrow: {a: [1080, 490], b: [1246, 348], bend: 26, size: 22}}]}
+    - {pen: 0.9, after: 0.35, shapes: [{megaphone: {at: [1395, 310], size: 150}}]}
+    - {text: "channel", at: [1395, 450], after: 1.0, size: 62}
+    - {text: "automated posts", at: [906, 660], after: 1.4, size: 50, color: soft}
+  group:
+    - {pen: 0.45, shapes: [{arrow: {a: [1080, 552], b: [1246, 702], bend: -26, size: 22}}]}
+    - {pen: 1.0, after: 0.35, shapes: [{people: {at: [1395, 740], size: 92}}]}
+    - {text: "group", at: [1395, 880], after: 1.0, size: 62}

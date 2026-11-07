@@ -1,0 +1,50 @@
+# T tools/doodles_tele.py _nativeapp: a mini app inside Telegram, linked to a bot; hosting, AI building, templates
+about: a Telegram phone with a mini app linked to a bot, fed by hosting, AI and templates
+lang: ar
+beats:
+  tg:
+    - pen: 0.9
+      float: 4
+      shapes:
+        - phone: {at: [1250, 530], w: 300, h: 620}
+        - line: {pts: [[1104, 310], [1396, 310]], amp: 0.6}
+    - {pen: 0.4, after: 0.6, shapes: [{telegram: {at: [1250, 265], R: 28}}]}
+    - {text: "تيليغرام", at: [1250, 160], after: 0.5, size: 56}
+  miniapp:
+    - pen: 1.1
+      shapes:
+        - rect: {at: [1125, 520], w: 250, h: 295, r: 18, color: accent, fill: 0.18}
+        - line: {pts: [[1130, 560], [1370, 560]], color: accent, amp: 0.5}
+        - rect: {at: [1150, 580], w: 90, h: 62, r: 10, lw: 0.8, amp: 0.7}
+        - rect: {at: [1255, 580], w: 90, h: 62, r: 10, lw: 0.8, amp: 0.7}
+        - rect: {at: [1150, 658], w: 90, h: 62, r: 10, lw: 0.8, amp: 0.7}
+        - rect: {at: [1255, 658], w: 90, h: 62, r: 10, lw: 0.8, amp: 0.7}
+        - rect: {at: [1150, 736], w: 90, h: 62, r: 10, lw: 0.8, amp: 0.7}
+        - rect: {at: [1255, 736], w: 90, h: 62, r: 10, lw: 0.8, amp: 0.7}
+    - {text: "تطبيق داخل تيليغرام", at: [1250, 900], after: 0.7, size: 50}
+  bot:
+    - pen: 0.9
+      shapes:
+        - line: {pts: [[1405, 430], [1555, 430]], amp: 0.5}
+        - bot: {at: [1650, 430], w: 130, h: 114}
+    - {text: "مربوط ببوت", at: [1640, 570], after: 0.6, size: 50}
+  host:
+    - pen: 0.9
+      shapes:
+        - server: {at: [400, 300], w: 150, unit_h: 44, units: 2, gap: 8}
+        - arrow: {a: [560, 300], b: [1090, 400], size: 20, lw: 0.85}
+    - {text: "استضافة بوتك", at: [400, 385], after: 0.5, size: 50}
+  ai:
+    - pen: 0.9
+      shapes:
+        - spark: {at: [400, 520], R: 55}
+        - arrow: {a: [560, 520], b: [1090, 520], size: 20, lw: 0.85}
+    - {text: "ابنِ بالذكاء الاصطناعي", at: [420, 610], after: 0.5, size: 50}
+  templates:
+    - pen: 0.9
+      shapes:
+        - rect: {at: [330, 705], w: 140, h: 70, r: 10, lw: 0.85}
+        - rect: {at: [352, 723], w: 140, h: 70, r: 10, lw: 0.85}
+        - rect: {at: [374, 741], w: 140, h: 70, r: 10, lw: 0.85, fill: 0.25}
+        - arrow: {a: [590, 740], b: [1090, 640], size: 20, lw: 0.85}
+    - {text: "قوالب مجرّبة", at: [420, 850], after: 0.5, size: 50}

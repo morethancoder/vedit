@@ -1,0 +1,15 @@
+# base doodles: neutral. Ivory lines, the pack's quiet grey accent for fills, a calmer wobble, no hand lettering
+# (IBM Plex Sans Arabic for both scripts, JetBrains Mono for code). Packs override any key; the rest falls here.
+stroke: "#FAF9F5"
+accent: accent        # #C9D1D9, or the channel accent
+soft: "#E3E7EB"
+warn: "#F2A38F"
+width: 4.6
+wobble: 0.8
+lettering:
+  latin: '"IBM Plex Sans Arabic", sans-serif'
+  arabic: '"IBM Plex Sans Arabic", sans-serif'
+  mono: '"JetBrains Mono", monospace'
+  arabic_scale: 1.0
+shadow: "0 2px 14px rgba(0, 0, 0, 0.6)"
+motion: {pen: power1.inOut, fill: sine.inOut, label: power2.out, out: power1.in}

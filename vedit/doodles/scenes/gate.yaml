@@ -1,0 +1,35 @@
+# T tools/doodles_tele.py _gate: a TikTok video sends people to the bot's free tool; subscribed? no -> join the
+# channel first; yes -> they use the service and the channel grows
+about: a subscribe gate - free tool, "subscribed?", join the channel first, members grow
+lang: ar
+beats:
+  tiktok:
+    - {pen: 0.9, float: 4, shapes: [{play_phone: {at: [1620, 340], w: 150, h: 260}}]}
+    - {text: "فيديو TikTok", at: [1620, 540], after: 0.5, size: 56}
+  bot:
+    - {pen: 0.4, shapes: [{arrow: {a: [1500, 340], b: [1420, 340], size: 20}}]}
+    - {pen: 0.9, after: 0.3, float: 4, shapes: [{bot: {at: [1300, 350], w: 190, h: 165}}]}
+    - {text: "البوت", at: [1300, 500], after: 0.9, size: 58}
+  free:
+    - {pen: 0.9, shapes: [{gift: {at: [1020, 350], w: 110}}]}
+    - {text: "أداة مجانية", at: [1010, 500], after: 0.5, size: 58, color: accent}
+  check:
+    - pen: 0.9
+      shapes:
+        - arrow: {a: [930, 340], b: [790, 340], size: 20}
+        - diamond: {at: [640, 340], w: 290, h: 170}
+    - {text: "مشترك؟", at: [640, 340], after: 0.6, size: 52}
+  "no":
+    - pen: 0.9
+      shapes:
+        - arrow: {a: [640, 430], b: [640, 585], size: 20, color: warn}
+        - telegram: {at: [640, 660], R: 72}
+    - {text: "اشترك بالقناة أول", at: [640, 790], after: 0.6, size: 54, color: warn}
+  grow:
+    - pen: 0.8
+      shapes:
+        - arrow: {a: [485, 340], b: [395, 340], size: 20}
+        - check: {at: [300, 340], k: 130, color: soft}
+    - {text: "يستخدم الخدمة", at: [300, 470], after: 0.5, size: 52}
+    - {pen: 0.6, after: 0.6, shapes: [{arrow: {a: [190, 790], b: [350, 600], size: 22, color: accent}}]}
+    - {text: "+ أعضاء", at: [270, 870], after: 0.9, size: 62, color: accent}

@@ -1,0 +1,16 @@
+# claude-violet doodles: C tools/doodles.py's look. Ivory lines, violet fills and marks, lilac secondary labels,
+# soft coral for errors, a violet-black halo behind the lettering. Latin in Caveat; Arabic falls to Noto Naskh
+# Arabic (C has no Arabic hand); code in JetBrains Mono. The violet is C's doodle violet, not the pack accent.
+stroke: "#FAF9F5"
+accent: "#B9A5FF"     # C VIOLET
+soft: lilac           # C LILAC (#CDBEFF)
+warn: "#F2A38F"       # C WARM
+width: 4.6
+wobble: 1.0
+lettering:
+  latin: '"Caveat", cursive'
+  arabic: '"Noto Naskh Arabic", serif'
+  mono: '"JetBrains Mono", monospace'
+  arabic_scale: 0.92
+shadow: "0 2px 14px rgba(10, 6, 24, 0.55)"
+motion: {pen: power1.inOut, fill: sine.inOut, label: power2.out, out: power1.in}

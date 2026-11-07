@@ -1,0 +1,10 @@
+<!-- T logo_motion: the mark turns in; spinning marks (pack logo_motion.spin) keep drifting -->
+<script>
+{{#logo.spin}}
+        tl.fromTo(q(".logo"), { rotation: -140, scale: 0.3, opacity: 0 }, { rotation: 0, scale: 1, opacity: 1, duration: 0.8, ease: "{{m.ease_pop}}" }, 0.08);
+        tl.to(q(".logo"), { rotation: 40, duration: Math.max(D - 1.0, 0.5), ease: "none" }, 0.88);
+{{/logo.spin}}
+{{^logo.spin}}
+        tl.fromTo(q(".logo"), { rotation: -20, scale: 0.4, opacity: 0 }, { rotation: 0, scale: 1, opacity: 1, duration: 0.8, ease: "{{m.ease_pop}}" }, 0.08);
+{{/logo.spin}}
+</script>

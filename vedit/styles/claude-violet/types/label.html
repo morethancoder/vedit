@@ -1,0 +1,28 @@
+<!-- vedit
+slots:
+  logo: {kind: logo, required: true, help: "a mark the style offers (logos/)"}
+  kicker: {required: true, help: "small line above the title"}
+  title: {required: true}
+  sub: {help: "optional line under the title"}
+  mono: {kind: bool, help: "title in the monospace font (a URL, a command)"}
+-->
+<style>
+      /* C label: lower third inside title safe (x 150, bottom 118), spark-led, serif title, no box */
+      .wrap { position: absolute; {{#left}}left{{/left}}{{#right}}right{{/right}}: 150px; bottom: 118px; max-width: 780px; display: flex;
+        justify-content: {{#left}}flex-start{{/left}}{{#right}}flex-end{{/right}}; }
+      .lt { position: relative; display: flex; align-items: flex-start; gap: 22px; text-align: start; }
+      .lt .logo { margin-top: 2px; position: relative; }
+      .lt[dir="rtl"] .logo { margin-top: 8px; }
+      .txt { position: relative; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+{{#blur}}{{&part.blur_css}}{{/blur}}
+</style>
+        <div class="wrap">{{#blur}}<div class="blurbg"></div>{{/blur}}<div class="lt" dir="{{dir}}">
+          {{&logo.html}}
+          <div class="txt"><div class="kicker">{{kicker}}</div><div class="title{{#mono}} mono{{/mono}}">{{title}}</div>{{#sub}}<div class="sub">{{sub}}</div>{{/sub}}</div>
+        </div></div>
+<script>
+        tl.fromTo(qa(".txt > *"), { opacity: 0, y: {{m.rise}} }, { opacity: 1, y: 0, duration: {{m.in}}, ease: "{{m.ease_in}}", stagger: {{m.stagger}} }, 0.12);
+{{&part.logo_motion}}
+        tl.to(q(".lt"), { opacity: 0, y: -12, duration: {{m.out}}, ease: "{{m.ease_out}}" }, D - {{m.out_lead}});
+{{#blur}}{{&part.blur_motion}}{{/blur}}
+</script>

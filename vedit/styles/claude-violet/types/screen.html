@@ -1,0 +1,44 @@
+<!-- vedit
+slots:
+  source: {required: true, help: "a source id from project.yaml (a screen recording)"}
+  from: {kind: number, help: "seconds into the recording to start from"}
+  kicker: {}
+  title: {}
+  steps: {kind: list, help: "numbered lines beside the recording"}
+-->
+<style>
+      /* C broll2 over the blurred A-roll: spark-led heading, lilac-ringed steps, the recording in a soft window */
+      .scene { position: absolute; inset: 0; }
+      .left { position: absolute; left: 150px; top: 0; bottom: 0; width: 500px; display: flex; flex-direction: column; justify-content: center; }
+      .hd { display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+      .hd .mark { width: 50px; height: 50px; display: block; }
+      .hd .kicker { color: {{c.lilac}}; }
+      .hd .title { color: {{c.ivory}}; font-size: 56px; line-height: 1.06; }
+      .left[dir="rtl"] .hd .title { line-height: 1.4; }
+      .steps { display: flex; flex-direction: column; gap: 18px; margin-top: 34px; }
+      .step { display: flex; align-items: center; gap: 18px; }
+      .num { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 2px solid {{c.lilac}}; color: {{c.ivory}};
+        font: 700 20px/36px {{&font.text}}; text-align: center; }
+      .step span { font: 400 28px/1.3 {{&font.text}}; color: {{c.ivory}}; text-shadow: 0 2px 12px rgba(0,0,0,.5); }
+      .one { position: absolute; right: 110px; top: {{video.top}}px; }
+      .win { position: relative; width: {{video.w}}px; height: {{video.h}}px; border-radius: 18px; overflow: hidden; background: #000;
+        box-shadow: 0 40px 90px rgba(5,2,14,.55), 0 0 0 1px rgba(231,224,251,.16); }
+      .win video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+</style>
+        <div class="scene">
+          <div class="left" dir="{{dir}}">
+            <div class="hd"><svg class="mark" viewBox="-50 -50 100 100"><g fill="{{th.spark}}"><rect x="-4.2" y="-44" width="8.4" height="44" rx="4.2" transform="rotate(0)"/><rect x="-4.2" y="-34" width="8.4" height="34" rx="4.2" transform="rotate(36)"/><rect x="-4.2" y="-42" width="8.4" height="42" rx="4.2" transform="rotate(72)"/><rect x="-4.2" y="-30" width="8.4" height="30" rx="4.2" transform="rotate(108)"/><rect x="-4.2" y="-40" width="8.4" height="40" rx="4.2" transform="rotate(144)"/><rect x="-4.2" y="-36" width="8.4" height="36" rx="4.2" transform="rotate(180)"/><rect x="-4.2" y="-44" width="8.4" height="44" rx="4.2" transform="rotate(216)"/><rect x="-4.2" y="-32" width="8.4" height="32" rx="4.2" transform="rotate(252)"/><rect x="-4.2" y="-40" width="8.4" height="40" rx="4.2" transform="rotate(288)"/><rect x="-4.2" y="-34" width="8.4" height="34" rx="4.2" transform="rotate(324)"/></g></svg>{{#kicker}}<div class="kicker">{{kicker}}</div>{{/kicker}}{{#title}}<div class="title">{{title}}</div>{{/title}}</div>
+            <div class="steps">{{#steps}}<div class="step"><div class="num">{{n}}</div><span>{{text}}</span></div>{{/steps}}</div>
+          </div>
+          <div class="one"><div class="win"><video id="{{id}}-v" src="{{video.src}}" muted playsinline data-start="0" data-media-start="{{video.from}}" data-duration="{{dur}}" data-track-index="0"></video></div></div>
+        </div>
+<script>
+        tl.fromTo(q(".hd"), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "{{m.ease_in}}" }, 0.3);
+        tl.fromTo(q(".mark"), { rotation: -140, scale: 0.3, opacity: 0 }, { rotation: 0, scale: 1, opacity: 1, duration: 0.8, ease: "{{m.ease_pop}}" }, 0.08);
+        tl.to(q(".mark"), { rotation: 40, duration: Math.max(D - 1.0, 0.5), ease: "none" }, 0.88);
+        tl.fromTo(q(".one"), { opacity: 0, y: 50, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "{{m.ease_in}}" }, 0.35);
+        const steps = qa(".step"), last = Math.min(D * 0.45, 7.0);
+        steps.forEach((el, i) => tl.fromTo(el, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.5, ease: "{{m.ease_in}}" },
+          steps.length > 1 ? 1.2 + (last - 1.2) * i / (steps.length - 1) : 1.2));
+        tl.to(q(".scene"), { opacity: 0, duration: {{m.scene_out}}, ease: "{{m.ease_out}}" }, D - {{m.scene_lead}});
+</script>

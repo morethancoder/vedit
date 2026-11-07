@@ -1,0 +1,87 @@
+# yellow-doodle: the Telegram video's look (T tools/build.py). Numbers are T's, tuned by eye and ear.
+# Types label, chip, kinetic, big-number, chapter, screen, plug, doodle are T's (types/); doodle line style and
+# lettering are in doodle.yaml (T doodles.py: ivory lines, yellow accent, Aref Ruqaa / Caveat).
+# Marks: logos telegram, octopus and spark live in base (the names cues use, recoloured per pack by th.spark / th.octo); here spark is yellow and spins.
+# Sounds: the mp3 files stay in base (shared, neutral clicks/whooshes any pack can map); this pack owns T's map.
+name: yellow-doodle
+extends: base
+summary: bright yellow accent, Arabic, hand-drawn doodles (the Telegram video)
+keywords: [yellow, doodle, arabic, warm, hand-drawn, ruqaa, bright, telegram, playful]
+lang: [ar, en]
+
+colors:
+  accent: "#FFD60A"
+  ivory: "#FAF9F5"
+  ink: "#16140E"
+  night: "#12110D"
+
+fonts:
+  - {family: "IBM Plex Sans Arabic", file: fonts/IBMPlexSansArabic-Regular.ttf, weight: 400}
+  - {family: "IBM Plex Sans Arabic", file: fonts/IBMPlexSansArabic-Medium.ttf, weight: 500}
+  - {family: "IBM Plex Sans Arabic", file: fonts/IBMPlexSansArabic-Bold.ttf, weight: 700}
+  - {family: "Aref Ruqaa", file: fonts/ArefRuqaa-Bold.ttf, weight: 700}
+  - {family: "Caveat", file: fonts/caveat-500.woff2, weight: 500}   # doodle lettering, Latin (T)
+  - {family: "Caveat", file: fonts/caveat-700.woff2, weight: 700}
+  - {family: "JetBrains Mono", file: fonts/JetBrainsMono-Bold.ttf, weight: 700}
+font:
+  text: '"IBM Plex Sans Arabic", sans-serif'
+  mono: '"JetBrains Mono", monospace'
+  hand: '"Aref Ruqaa", serif'
+
+# text themes, picked per cue by placement from the brightness behind the graphic (no boxes behind text)
+themes:
+  dark:
+    text: "#FAF9F5"
+    sub: "rgba(250,249,245,.92)"
+    kicker: "#FFD60A"
+    shadow: "0 1px 2px rgba(0,0,0,.75), 0 2px 14px rgba(0,0,0,.6), 0 0 36px rgba(8,8,6,.5)"
+    spark: "#FFD60A"
+    octo: "#FAF9F5"
+    code: "#FAF9F5"
+    prompt: "#FFD60A"
+  light:
+    text: "#16140E"
+    sub: "#3A372C"
+    kicker: "#8A6A00"
+    shadow: "0 1px 2px rgba(255,255,255,.7), 0 0 18px rgba(250,249,245,.8)"
+    spark: "#B08700"
+    octo: "#16140E"
+    code: "#16140E"
+    prompt: "#8A6A00"
+# over a busy screen layout a denser halo keeps dark-theme letters readable (with the feathered blur)
+busy_shadow: "0 1px 2px rgba(0,0,0,.85), 0 0 6px rgba(0,0,0,.75), 0 2px 18px rgba(0,0,0,.75), 0 0 44px rgba(8,8,6,.7)"
+
+# motion tokens, in templates as {{m.<key>}} (GSAP ease names; seconds; px for rise). T's numbers.
+motion:
+  ease_in: power3.out
+  ease_out: power2.in
+  ease_draw: power2.inOut
+  ease_pop: back.out(1.7)
+  in: 0.55
+  out: 0.35
+  out_lead: 0.42
+  scene_out: 0.45
+  scene_lead: 0.55
+  stagger: 0.08
+  rise: 16
+
+# big-number: Plex Sans Arabic 700 advances (the file is in base, which uses the same font), T's tracking/sizes
+advances: plex700-advances.json
+big: {track: -0.03, min_px: 110, max_px: 300, tuck: 0.45}
+
+# the spark keeps turning after it lands (partials/logo_motion.html)
+logo_motion: {spin: [spark]}
+
+# full-frame moments: what the A-roll does behind them
+focus: {blur: 20, brightness: 0.42, in: 0.3, out: 0.35}
+
+# T's map: cue kind -> [sound, gain]; gains land ~18 dB under the voice (program about -16 LUFS). No sparkles or bells.
+sfx:
+  label: [click-soft, 0.30]
+  chip: [key-press, 0.55]
+  kinetic: [pop, 0.16]
+  big-number: [whoosh-short, 0.11]
+  focus: [whoosh-short, 0.13]
+  beat: [click-soft, 0.16]
+  url: [click, 0.38]
+  phone: [whoosh-short, 0.11]

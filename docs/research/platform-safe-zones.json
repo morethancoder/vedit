@@ -1,0 +1,651 @@
+{
+ "youtube-long-16x9": {
+  "canvas": [
+   1920,
+   1080
+  ],
+  "aspects": [
+   "16:9"
+  ],
+  "safe": {
+   "top": null,
+   "bottom": null,
+   "left": null,
+   "right": null
+  },
+  "regions": [
+   {
+    "name": "end-screen inner safe area (editor rule)",
+    "x": 192,
+    "y": 108,
+    "w": 1536,
+    "h": 864,
+    "what": "end-screen elements must sit inside inner 80% (10% margin per edge) per third-party checker; YouTube Studio also rejects 'Element outside safe area'"
+   },
+   {
+    "name": "player controls/progress bar",
+    "x": 0,
+    "y": null,
+    "w": 1920,
+    "h": null,
+    "what": "bottom strip; no official pixel height found"
+   },
+   {
+    "name": "title/channel overlay on hover",
+    "x": 0,
+    "y": 0,
+    "w": 1920,
+    "h": null,
+    "what": "top strip on hover; no official pixel height found"
+   }
+  ],
+  "crops": [],
+  "sources": [
+   {
+    "url": "https://www.collabpals.com/tools/youtube-end-screen-previewer",
+    "date": "2026 (undated)"
+   },
+   {
+    "url": "https://services.google.com/fh/files/misc/universalsafezones-youtube.pdf",
+    "date": "undated; graphic only, no numbers"
+   }
+  ],
+  "confidence": "low",
+  "notes": "No official pixel values. Insets given as null; regions with null y/h unknown. Fallback inference: 10% margin each edge (192 px sides, 108 px top/bottom)."
+ },
+ "youtube-shorts": {
+  "canvas": [
+   1080,
+   1920
+  ],
+  "aspects": [
+   "9:16"
+  ],
+  "safe": {
+   "top": 288,
+   "bottom": 672,
+   "left": 48,
+   "right": 192
+  },
+  "regions": [
+   {
+    "name": "right action column",
+    "x": 888,
+    "y": 288,
+    "w": 192,
+    "h": 960,
+    "what": "like/dislike/comment/share/remix (adkit: safe rect x48-888, y288-1248)"
+   },
+   {
+    "name": "bottom channel/title/sound",
+    "x": 0,
+    "y": 1248,
+    "w": 1080,
+    "h": 672,
+    "what": "channel, subscribe, title, music"
+   }
+  ],
+  "crops": [],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/youtube",
+    "date": "2026-10-21"
+   },
+   {
+    "url": "https://adaptlypost.com/en/blog/social-media-safe-zones-2026-complete-guide",
+    "date": "2026 (undated)"
+   },
+   {
+    "url": "https://services.google.com/fh/files/misc/universalsafezones-youtube.pdf",
+    "date": "undated"
+   }
+  ],
+  "confidence": "low",
+  "notes": "Conflict: adaptlypost top120/bottom300(360 desc open)/right96; adkit top288/bottom672/left48/right192; other tools 840x960..984x1500 safe rect. Shorts end screens: one source says unsupported (unverified)."
+ },
+ "instagram-reels": {
+  "canvas": [
+   1080,
+   1920
+  ],
+  "aspects": [
+   "9:16"
+  ],
+  "safe": {
+   "top": 269,
+   "bottom": 672,
+   "left": 65,
+   "right": 227
+  },
+  "regions": [
+   {
+    "name": "right action column",
+    "x": 853,
+    "y": 1152,
+    "w": 227,
+    "h": 768,
+    "what": "like/comment/share/audio (adkit, lower-right block below y=1152)"
+   },
+   {
+    "name": "bottom caption/username/audio",
+    "x": 0,
+    "y": 1248,
+    "w": 1080,
+    "h": 672,
+    "what": "account, caption, audio pill"
+   },
+   {
+    "name": "top bar",
+    "x": 0,
+    "y": 0,
+    "w": 1080,
+    "h": 269,
+    "what": "Reels label, camera icon"
+   }
+  ],
+  "crops": [
+   {
+    "where": "profile grid",
+    "aspect": "3:4 (1080x1440 center crop; some sources 1013x1350)"
+   },
+   {
+    "where": "main feed",
+    "aspect": "4:5 (center 1080x1350; some sources only)"
+   },
+   {
+    "where": "Reels tab",
+    "aspect": "9:16 full"
+   }
+  ],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/instagram",
+    "date": "2026-10-21"
+   },
+   {
+    "url": "https://adaptlypost.com/en/blog/social-media-safe-zones-2026-complete-guide",
+    "date": "2026"
+   },
+   {
+    "url": "https://www.kapwing.com/resources/instagrams-new-grid-layout-size-and-dimensions-2025/",
+    "date": "2025-12-30"
+   },
+   {
+    "url": "https://billo.app/blog/meta-ads-safe-zones",
+    "date": "2026-06-16"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Conflict: adaptlypost top210/bottom310(390 sponsored)/right84; billo (1440x2560 canvas) top14% bottom20-35% sides 6%; Meta Reels ads guide copy: 14/35/6 %; adkit 269/672/65. Safe 14/35/6 on 1080x1920 = 269/672/65. Grid 3:4 confirmed by Kapwing; Reel-in-feed 4:5 only blogs."
+ },
+ "instagram-stories": {
+  "canvas": [
+   1080,
+   1920
+  ],
+  "aspects": [
+   "9:16"
+  ],
+  "safe": {
+   "top": 269,
+   "bottom": 672,
+   "left": 65,
+   "right": 65
+  },
+  "regions": [
+   {
+    "name": "top bar (progress, avatar)",
+    "x": 0,
+    "y": 0,
+    "w": 1080,
+    "h": 269,
+    "what": "progress bars, profile row"
+   },
+   {
+    "name": "bottom reply bar",
+    "x": 0,
+    "y": 1248,
+    "w": 1080,
+    "h": 672,
+    "what": "send message/reactions (conservative)"
+   }
+  ],
+  "crops": [],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/instagram",
+    "date": "2026-10-21"
+   },
+   {
+    "url": "https://adaptlypost.com/en/blog/social-media-safe-zones-2026-complete-guide",
+    "date": "2026"
+   },
+   {
+    "url": "https://billo.app/blog/meta-ads-safe-zones",
+    "date": "2026-06-16"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Conflict: adaptlypost top100/bottom200; billo/older guides 14% top (~270) /14-20% bottom (270-380); adkit 269/672. Claimed March 2026 unified FB+IG Stories/Reels zone: single source (billo), unverified."
+ },
+ "instagram-feed-4x5": {
+  "canvas": [
+   1080,
+   1350
+  ],
+  "aspects": [
+   "4:5"
+  ],
+  "safe": {
+   "top": 135,
+   "bottom": 135,
+   "left": 108,
+   "right": 108
+  },
+  "regions": [],
+  "crops": [
+   {
+    "where": "profile grid",
+    "aspect": "3:4 center crop"
+   }
+  ],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/instagram",
+    "date": "2026-10-21"
+   }
+  ],
+  "confidence": "low",
+  "notes": "Insets are adkit optional buffers (10%), not Meta requirements. Native controls only overlay at bottom briefly (mute icon)."
+ },
+ "instagram-feed-1x1": {
+  "canvas": [
+   1080,
+   1080
+  ],
+  "aspects": [
+   "1:1"
+  ],
+  "safe": {
+   "top": 108,
+   "bottom": 108,
+   "left": 108,
+   "right": 108
+  },
+  "regions": [],
+  "crops": [
+   {
+    "where": "profile grid",
+    "aspect": "3:4 center crop"
+   }
+  ],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/instagram",
+    "date": "2026-10-21"
+   }
+  ],
+  "confidence": "low",
+  "notes": "Optional 10% buffer, not official."
+ },
+ "tiktok": {
+  "canvas": [
+   1080,
+   1920
+  ],
+  "aspects": [
+   "9:16"
+  ],
+  "safe": {
+   "top": 240,
+   "bottom": 660,
+   "left": 120,
+   "right": 120
+  },
+  "regions": [
+   {
+    "name": "right action column",
+    "x": 780,
+    "y": 840,
+    "w": 300,
+    "h": 1080,
+    "what": "like/comment/bookmark/share/profile (In-Feed template: right margin 300 below y=840)"
+   },
+   {
+    "name": "bottom caption/sound",
+    "x": 0,
+    "y": 1260,
+    "w": 1080,
+    "h": 660,
+    "what": "username, caption, sound ticker"
+   },
+   {
+    "name": "top tabs",
+    "x": 0,
+    "y": 0,
+    "w": 1080,
+    "h": 240,
+    "what": "Following/For You, search"
+   }
+  ],
+  "crops": [
+   {
+    "where": "profile grid",
+    "aspect": "3:4 (approx; not verified)"
+   }
+  ],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/tiktok",
+    "date": "2026-10-21"
+   },
+   {
+    "url": "https://www.trymypost.com/blog/tiktok-ad-specs-2026-safe-zones",
+    "date": "2026-02-15"
+   },
+   {
+    "url": "https://adaptlypost.com/en/blog/social-media-safe-zones-2026-complete-guide",
+    "date": "2026"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Ads templates: In-Feed 240/660/120/120 (right 300 below y840); Anchor 4-line caption 252/1014/120/120 (right 240 below y360). Organic conflicts: adaptlypost 108/320(370 ads)/L60/R120; trymypost 150/350-400/R120; catalog-API 483-484 bottom. TikTok publishes downloadable templates, no px in help page. Grid crop figure unverified."
+ },
+ "facebook-reels": {
+  "canvas": [
+   1080,
+   1920
+  ],
+  "aspects": [
+   "9:16"
+  ],
+  "safe": {
+   "top": 269,
+   "bottom": 672,
+   "left": 65,
+   "right": 227
+  },
+  "regions": [
+   {
+    "name": "right action column",
+    "x": 853,
+    "y": 1152,
+    "w": 227,
+    "h": 768,
+    "what": "like/comment/share buttons"
+   }
+  ],
+  "crops": [],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/facebook",
+    "date": "2026-10-21"
+   },
+   {
+    "url": "https://adaptlypost.com/en/blog/social-media-safe-zones-2026-complete-guide",
+    "date": "2026"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "adaptlypost: top100 bottom300. Same Meta 14/35/6 basis as IG Reels."
+ },
+ "facebook-stories": {
+  "canvas": [
+   1080,
+   1920
+  ],
+  "aspects": [
+   "9:16"
+  ],
+  "safe": {
+   "top": 269,
+   "bottom": 672,
+   "left": 65,
+   "right": 65
+  },
+  "regions": [],
+  "crops": [],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/facebook",
+    "date": "2026-10-21"
+   },
+   {
+    "url": "https://billo.app/blog/meta-ads-safe-zones",
+    "date": "2026-06-16"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "billo Stories-only: 14% top/14% bottom (358 px on 1440x2560 -> ~269/269 on 1080x1920)."
+ },
+ "facebook-feed-video": {
+  "canvas": [
+   1080,
+   1350
+  ],
+  "aspects": [
+   "4:5",
+   "1:1",
+   "16:9"
+  ],
+  "safe": {
+   "top": 135,
+   "bottom": 135,
+   "left": 108,
+   "right": 108
+  },
+  "regions": [],
+  "crops": [],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/facebook",
+    "date": "2026-10-21"
+   }
+  ],
+  "confidence": "low",
+  "notes": "Optional buffers (1080x1080: 108 all; 1080x1350: 135/135/108/108; 1080x608: 61/61/80/80), not Meta requirements."
+ },
+ "snapchat-spotlight-stories": {
+  "canvas": [
+   1080,
+   1920
+  ],
+  "aspects": [
+   "9:16"
+  ],
+  "safe": {
+   "top": 192,
+   "bottom": 672,
+   "left": 65,
+   "right": 65
+  },
+  "regions": [
+   {
+    "name": "lower-right exclusion",
+    "x": 918,
+    "y": 1056,
+    "w": 162,
+    "h": 864,
+    "what": "Spotlight/ad buttons"
+   }
+  ],
+  "crops": [],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/snapchat",
+    "date": "2026-10-21"
+   },
+   {
+    "url": "https://benly.ai/learn/snapchat-ads/snapchat-ad-specs-formats",
+    "date": "2026"
+   },
+   {
+    "url": "https://help.zuuvi.com/en/articles/8907258-social-content-safe-zones-keep-it-all-visible",
+    "date": "2025"
+   }
+  ],
+  "confidence": "low",
+  "notes": "Conflict: 150 top/bottom (benly, spilno, zuuvi 149); adkit 192/672 (10%/35%); other adkit-snapchat reading ~230/384; auditsocials 210/200. Snap publishes no single px safe zone (moda.app). No Spotlight-specific data found."
+ },
+ "x-video": {
+  "canvas": [
+   1080,
+   1920
+  ],
+  "aspects": [
+   "9:16",
+   "16:9",
+   "1:1"
+  ],
+  "safe": {
+   "top": 80,
+   "bottom": 450,
+   "left": 80,
+   "right": 80
+  },
+  "regions": [],
+  "crops": [],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/x",
+    "date": "2026-10-21"
+   }
+  ],
+  "confidence": "low",
+  "notes": "adkit states these are NOT official and unverified vs X's Vertical Video diagram. Landscape 1080x608 buffers 40/40/45/45 (adkit linkedin page values differ)."
+ },
+ "linkedin-video-vertical": {
+  "canvas": [
+   1080,
+   1920
+  ],
+  "aspects": [
+   "9:16"
+  ],
+  "safe": {
+   "top": 260,
+   "bottom": 560,
+   "left": 112,
+   "right": 210
+  },
+  "regions": [],
+  "crops": [],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/linkedin",
+    "date": "2026-10-21"
+   },
+   {
+    "url": "https://adaptlypost.com/en/blog/social-media-safe-zones-2026-complete-guide",
+    "date": "2026"
+   }
+  ],
+  "confidence": "low",
+  "notes": "Conflict: adaptlypost top100/bottom100 (996/1010x1720 zone). adkit says measures video interface."
+ },
+ "linkedin-video-feed": {
+  "canvas": [
+   1080,
+   608
+  ],
+  "aspects": [
+   "16:9",
+   "1:1",
+   "4:5"
+  ],
+  "safe": {
+   "top": 40,
+   "bottom": 40,
+   "left": 45,
+   "right": 45
+  },
+  "regions": [],
+  "crops": [],
+  "sources": [
+   {
+    "url": "https://adkit.so/tools/safe-zones/linkedin",
+    "date": "2026-10-21"
+   }
+  ],
+  "confidence": "low",
+  "notes": "Optional spacing only. Adkit universal feed landscape uses 61/61/80/80 instead."
+ },
+ "pinterest-video-pin": {
+  "canvas": [
+   1080,
+   1920
+  ],
+  "aspects": [
+   "9:16",
+   "1:2",
+   "2:3",
+   "3:4",
+   "4:5",
+   "1:1"
+  ],
+  "safe": {
+   "top": 270,
+   "bottom": 440,
+   "left": 65,
+   "right": 195
+  },
+  "regions": [],
+  "crops": [],
+  "sources": [
+   {
+    "url": "https://help.pinterest.com/en/article/review-pin-specs",
+    "date": "undated (official: 9:16 / 1080x1920 recommended)"
+   },
+   {
+    "url": "https://adaptlypost.com/en/blog/social-media-safe-zones-2026-complete-guide",
+    "date": "2026"
+   },
+   {
+    "url": "https://moda.app/resources/sizes/pinterest-idea-pin",
+    "date": "undated"
+   }
+  ],
+  "confidence": "low",
+  "notes": "Severe conflict: adaptlypost 100/220; others 170/340, 180/260, 270/440 (L65/R195). Chosen row = most conservative. Canvas official, insets not."
+ },
+ "telegram-stories": {
+  "canvas": [
+   1080,
+   1920
+  ],
+  "aspects": [
+   "9:16"
+  ],
+  "safe": {
+   "top": null,
+   "bottom": null,
+   "left": null,
+   "right": null
+  },
+  "regions": [],
+  "crops": [],
+  "sources": [],
+  "confidence": "low",
+  "notes": "No data found. Use generic 250 px top/bottom (third-party blog) or the Instagram Stories zone as a stand-in."
+ },
+ "whatsapp-status": {
+  "canvas": [
+   1080,
+   1920
+  ],
+  "aspects": [
+   "9:16"
+  ],
+  "safe": {
+   "top": null,
+   "bottom": null,
+   "left": null,
+   "right": null
+  },
+  "regions": [],
+  "crops": [],
+  "sources": [],
+  "confidence": "low",
+  "notes": "No data found. Use Instagram Stories zone as stand-in."
+ }
+}

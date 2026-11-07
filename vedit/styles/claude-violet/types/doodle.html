@@ -1,0 +1,43 @@
+<!-- vedit
+slots:
+  scene: {kind: scene, required: true, help: "a library scene name (vedit guide cue-doodle lists them) or an inline spec"}
+  beats: {kind: beats, required: true, help: "beat -> the spoken words that draw it"}
+-->
+<style>
+      /* T tools/doodles.py: chalky line drawing over the blurred footage; line colours, weight and wobble come from
+         this pack's doodle.yaml (baked into the SVG by vedit/doodles), lettering stacks and eases too */
+      [data-composition-id="{{id}}"] .dz-wrap { position: absolute; inset: 0; }
+      [data-composition-id="{{id}}"] svg.dz { position: absolute; left: 0; top: 0; overflow: visible; }
+      [data-composition-id="{{id}}"] .dw { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      [data-composition-id="{{id}}"] .dz-lb { position: absolute; white-space: nowrap; line-height: 1; }
+      [data-composition-id="{{id}}"] .dz-t { display: inline-block; padding: 0.12em 0.22em; font-family: {{&doodle.font.latin}}; line-height: 1;
+        color: {{doodle.font.ink}}; text-shadow: {{&doodle.font.shadow}}; }
+      [data-composition-id="{{id}}"] .dz-t.ar { font-family: {{&doodle.font.arabic}}; line-height: 1.25; padding: 0.05em 0.25em 0.2em; }
+      [data-composition-id="{{id}}"] .dz-t.mono { font-family: {{&doodle.font.mono}}; letter-spacing: -0.01em; }
+</style>
+        <div class="dz-wrap">
+          {{&doodle.svg}}
+          {{&doodle.labels}}
+        </div>
+<script>
+        // pen strokes: [id, dashoffset, start, duration]
+        const DRAW = {{&doodle.draw}};
+        for (const [k, o, t, d] of DRAW) tl.fromTo(q(".k" + k), { strokeDashoffset: o }, { strokeDashoffset: 0, duration: d, ease: "{{doodle.m.pen}}" }, t);
+        // flat fills and dots: [id, start, duration]
+        const FILL = {{&doodle.fill}};
+        for (const [k, t, d] of FILL) tl.fromTo(q(".k" + k), { opacity: 0 }, { opacity: 1, duration: d, ease: "{{doodle.m.fill}}" }, t);
+        // hand-lettered labels: [id, start, duration, mode] (w = left-to-right write-on, r = right-to-left, f = fade + rise)
+        const LAB = {{&doodle.lab}};
+        for (const [k, t, d, m] of LAB) {
+          if (m === "w") tl.fromTo(q(".k" + k), { y: 6, clipPath: "inset(-30% 100% -30% 0%)" }, { y: 0, clipPath: "inset(-30% 0% -30% 0%)", duration: d, ease: "{{doodle.m.pen}}" }, t);
+          else if (m === "r") tl.fromTo(q(".k" + k), { y: 6, clipPath: "inset(-30% 0% -30% 100%)" }, { y: 0, clipPath: "inset(-30% 0% -30% 0%)", duration: d, ease: "{{doodle.m.pen}}" }, t);
+          else tl.fromTo(q(".k" + k), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: d, ease: "{{doodle.m.label}}" }, t);
+        }
+        // slow idle turns once drawn: [group, svg origin, degrees, start, duration]
+        const SPIN = {{&doodle.spin}};
+        for (const [k, org, deg, t, d] of SPIN) tl.fromTo(q(".g" + k), { rotation: 0, svgOrigin: org }, { rotation: deg, svgOrigin: org, duration: d, ease: "none" }, t);
+        // idle float once drawn: [group, start, duration, px]
+        const FLOAT = {{&doodle.float}};
+        for (const [k, t, d, px] of FLOAT) tl.fromTo(q(".g" + k), { y: 0 }, { y: -px, duration: d, ease: "sine.inOut" }, t);
+        tl.fromTo(q(".dz-wrap"), { opacity: 1 }, { opacity: 0, duration: 0.45, ease: "{{doodle.m.out}}" }, {{doodle.fade_at}});
+</script>

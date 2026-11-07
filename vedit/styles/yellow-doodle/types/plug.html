@@ -1,0 +1,55 @@
+<!-- vedit
+slots:
+  url: {kind: words, help: "the spoken words when the address is said (the click lands on them)"}
+  trial: {kind: words, help: "the spoken words for the line under the address"}
+-->
+<style>
+      .phone { position: absolute; right: 190px; top: 96px; width: 330px; height: 600px; border-radius: 48px; padding: 11px;
+        background: #0B0B09; box-shadow: 0 40px 90px rgba(4,4,2,.6), 0 0 0 2px rgba(255,214,10,.28); }
+      .screen { position: relative; width: 100%; height: 100%; border-radius: 38px; overflow: hidden; background: #fff; }
+      .screen video, .screen img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .info { position: absolute; right: 150px; top: {{#plug.demo}}730px{{/plug.demo}}{{^plug.demo}}640px{{/plug.demo}}; width: 640px; display: flex; flex-direction: column; align-items: flex-end; gap: 14px; }
+      .brand { display: flex; align-items: center; gap: 16px; text-align: right; }
+      .plogo { width: 60px; height: 60px; border-radius: 15px; display: block; order: 2; }
+      .name { font: 700 54px/1.1 {{&font.text}}; color: {{c.ivory}}; text-shadow: {{&th.shadow}}; }
+      .url { position: relative; display: flex; flex-direction: column; align-items: flex-end; }
+      .addr { font: 700 50px/1.15 {{&font.text}}; color: {{c.ivory}}; text-shadow: {{&th.shadow}}; }
+      .line { display: block; width: 100%; height: 4px; background: {{c.accent}}; border-radius: 2px; transform-origin: right center; margin-top: 6px; }
+      .free { font: 500 30px/1.2 {{&font.text}}; color: {{c.accent}}; text-shadow: {{&th.shadow}}; }
+      .cursor { position: absolute; left: 1560px; top: {{#plug.demo}}868px{{/plug.demo}}{{^plug.demo}}778px{{/plug.demo}}; width: 34px; height: 48px; display: block;
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,.5)); transform-origin: 3px 2px; }
+</style>
+{{#plug.demo}}
+        <div class="phone"><div class="screen">
+          {{#plug.hold}}<img class="hold" src="{{plug.hold}}" alt="" />{{/plug.hold}}
+          <video id="{{id}}-demo" src="{{plug.demo}}" muted playsinline data-start="0.6" data-duration="{{plug.demo_dur}}" data-track-index="0"></video>
+        </div></div>
+{{/plug.demo}}
+        <div class="info">
+          <div class="brand">{{#plug.logo}}<img class="plogo" src="{{plug.logo}}" alt="" />{{/plug.logo}}<div>{{#plug.kicker}}<div class="kicker" dir="{{dir}}">{{plug.kicker}}</div>{{/plug.kicker}}<div class="name">{{plug.name}}</div></div></div>
+          {{#plug.url}}<div class="url"><span class="addr">{{plug.url}}</span><span class="line"></span></div>{{/plug.url}}
+          {{#plug.trial}}<div class="free" dir="{{dir}}">{{plug.trial}}</div>{{/plug.trial}}
+        </div>
+{{#plug.url}}
+        <svg class="cursor" viewBox="0 0 28 40"><path d="M3 2 L3 31 L10.5 24.5 L15.5 36 L20.5 33.8 L15.6 22.6 L25 22.3 Z"
+          fill="#FAF9F5" stroke="#12110D" stroke-width="2.2" stroke-linejoin="round"/></svg>
+{{/plug.url}}
+<script>
+        // T ptb: the phone demo, then the address on its spoken words with a cursor click (engine: url_at, click_at, free_at)
+{{#plug.demo}}
+        tl.fromTo(q(".phone"), { opacity: 0, y: 70, rotation: 3 }, { opacity: 1, y: 0, rotation: 0, duration: 0.8, ease: "{{m.ease_in}}" }, 0.1);
+{{/plug.demo}}
+        tl.fromTo(q(".brand"), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6, ease: "{{m.ease_in}}" }, 0.5);
+{{#plug.url}}
+        tl.fromTo(q(".addr"), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.55, ease: "{{m.ease_in}}" }, {{url_at}});
+        tl.fromTo(q(".line"), { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "{{m.ease_draw}}" }, {{url_at}} + 0.25);
+        tl.fromTo(q(".cursor"), { opacity: 0, x: 260, y: 150 }, { opacity: 1, x: 0, y: 0, duration: 0.8, ease: "{{m.ease_draw}}" }, {{url_at}} + 0.45);
+        tl.fromTo(q(".cursor"), { scale: 1 }, { scale: 0.82, duration: 0.09, ease: "power1.in", yoyo: true, repeat: 1 }, {{click_at}});
+        tl.fromTo(q(".addr"), { color: "{{c.ivory}}" }, { color: "{{c.accent}}", duration: 0.12, yoyo: true, repeat: 1 }, {{click_at}});
+        tl.to(q(".cursor"), { opacity: 0, x: 40, y: 30, duration: 0.5, ease: "{{m.ease_out}}" }, {{click_at}} + 1.4);
+{{/plug.url}}
+{{#plug.trial}}
+        tl.fromTo(q(".free"), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "{{m.ease_in}}" }, {{free_at}});
+{{/plug.trial}}
+        tl.to(qa(".phone, .info"), { opacity: 0, duration: {{m.scene_out}}, ease: "{{m.ease_out}}" }, D - {{m.scene_lead}});
+</script>

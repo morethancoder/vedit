@@ -1,0 +1,37 @@
+# C tools/doodles.py _chatid: every chat has an id; the chat_id is the key Claude uses to post into that chat
+about: three chats with ids, a chat_id key circles one, Claude sends to it
+lang: en
+beats:
+  chats:
+    - pen: 0.7
+      name: card0
+      shapes:
+        - rect: {at: [1080, 279], w: 540, h: 132, r: 26}
+        - oval: {at: [1150, 345], rx: 36, lw: 0.9, hatch: {gap: 12, inset: [2, 6]}}
+    - {text: "-1001873246", at: [1218, 345], after: 0.4, size: 42, mono: true, anchor: start, weight: 500}
+    - pen: 0.7
+      after: 0.3
+      name: card1
+      shapes:
+        - rect: {at: [1080, 474], w: 540, h: 132, r: 26}
+        - oval: {at: [1150, 540], rx: 36, lw: 0.9, hatch: {gap: 12, inset: [2, 6]}}
+    - {text: "-1002519034", at: [1218, 540], after: 0.7, size: 42, mono: true, anchor: start, weight: 500}
+    - pen: 0.7
+      after: 0.6
+      name: card2
+      shapes:
+        - rect: {at: [1080, 669], w: 540, h: 132, r: 26}
+        - oval: {at: [1150, 735], rx: 36, lw: 0.9, hatch: {gap: 12, inset: [2, 6]}}
+    - {text: "-1001467780", at: [1218, 735], after: 1.0, size: 42, mono: true, anchor: start, weight: 500}
+  key:
+    - {pen: 0.9, shapes: [{key: {at: [800, 535], size: 1.15}}]}
+    - {text: "chat_id", at: [790, 440], after: 0.55, size: 50, mono: true, color: soft, weight: 700}
+    - pen: 0.7
+      after: 0.8
+      into: card1
+      shapes:
+        - oval: {at: [1372, 543], rx: 160, ry: 44, start: -2.6, color: soft, lw: 0.9, amp: 1.6}
+        - rect: {at: [1080, 474], w: 540, h: 132, r: 26, stroke: false, fill: {opacity: 0.22, dx: 9, dy: 8}}
+  send:
+    - {pen: 0.9, float: 4, shapes: [{bot: {at: [405, 610], w: 200, h: 172, face: spark}}]}
+    - {pen: 0.7, after: 0.65, shapes: [{arrow: {a: [540, 650], b: [1052, 574], bend: -56, size: 26}}]}

@@ -1,0 +1,17 @@
+# C tools/doodles.py _remote: your Claude Code session on the laptop, /remote-control, the Claude app on your phone
+about: laptop session linked by /remote-control to the Claude app on a phone
+lang: en
+beats:
+  laptop:
+    - {pen: 1.1, shapes: [{laptop: {at: [560, 505], w: 430, fill: true}}]}
+    - {text: "your session", at: [560, 760], after: 0.9, size: 62}
+  command:
+    - {pen: 0.9, after: 0.15, shapes: [{arrow: {a: [842, 520], b: [1238, 520], bend: 48, dashed: true, both: true, size: 24}}]}
+    - {text: "/remote-control", at: [1040, 404], size: 44, mono: true, color: soft, weight: 500}
+  phone:
+    - {pen: 0.8, shapes: [{phone: {at: [1380, 505], w: 210, h: 390}}]}
+    - pen: 0.55
+      after: 0.75
+      shapes: [{spark: {at: [1380, 492], R: 64}}]
+      spin: {about: [1380, 492], rate: 5, after: 1.3}
+    - {text: "Claude app", at: [1380, 760], after: 0.9, size: 62}

@@ -1,0 +1,14 @@
+# C tools/doodles.py _alwayson: the laptop session must stay open; my VPS is always on
+about: a laptop that must stay open vs a VPS that is always on
+lang: en
+beats:
+  laptop:
+    - {pen: 1.1, shapes: [{laptop: {at: [600, 465], w: 460, fill: true}}]}
+  stayopen:
+    - {text: "must stay open", at: [600, 760], size: 62, color: soft}
+    - {pen: 0.45, after: 0.75, shapes: [{line: {pts: [[440, 808], [762, 806]], color: soft, lw: 0.9, amp: 1.2}}]}
+  vps:
+    - {pen: 0.6, shapes: [{arrow: {a: [900, 470], b: [1158, 470], bend: 40, size: 26}}]}
+    - {pen: 1.0, after: 0.45, float: 4, shapes: [{server: {at: [1385, 455], w: 320}}]}
+    - {text: "my VPS", at: [1385, 680], after: 1.2, size: 74}
+    - {text: "always on", at: [1385, 760], after: 1.6, size: 56, color: soft}

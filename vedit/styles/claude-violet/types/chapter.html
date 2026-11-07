@@ -1,0 +1,33 @@
+<!-- vedit
+slots:
+  title: {required: true}
+  kicker: {}
+  logo: {kind: logo}
+-->
+<style>
+      /* C chapter: mark, spaced kicker, big serif title, a lilac rule drawn from the centre */
+      .wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+      .ch { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+      .ch .logo { width: 64px; height: 64px; margin-bottom: 8px; }
+      .ch .kicker { font-size: 28px; letter-spacing: .08em; text-transform: uppercase; }
+      .ch .kicker[dir="rtl"] { letter-spacing: 0; font-size: 32px; }
+      .ctitle { font: 600 124px/1.04 {{&font.serif}}; letter-spacing: -.03em; color: {{c.ivory}}; text-shadow: {{&th.shadow}};
+        text-align: center; max-width: 1600px; }
+      .ctitle[dir="rtl"] { letter-spacing: 0; line-height: 1.4; font-weight: 700; }
+      .rule { display: block; width: 260px; height: 3px; border-radius: 2px; background: {{c.accent}}; transform-origin: center; margin-top: 10px; }
+</style>
+        <div class="wrap"><div class="ch">
+          {{&logo.html}}
+          {{#kicker}}<div class="kicker" dir="{{dir}}">{{kicker}}</div>{{/kicker}}
+          <div class="ctitle" dir="{{dir}}">{{title}}</div>
+          <div class="rule"></div>
+        </div></div>
+<script>
+{{#kicker}}
+        tl.fromTo(q(".kicker"), { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.45, ease: "{{m.ease_in}}" }, 0.35);
+{{/kicker}}
+        tl.fromTo(q(".ctitle"), { opacity: 0, y: 34 }, { opacity: 1, y: 0, duration: 0.7, ease: "{{m.ease_in}}" }, 0.45);
+        tl.fromTo(q(".rule"), { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "{{m.ease_draw}}" }, 0.75);
+{{#logo.html}}{{&part.logo_motion}}{{/logo.html}}
+        tl.to(q(".ch"), { opacity: 0, y: -14, duration: 0.4, ease: "{{m.ease_out}}" }, D - 0.5);
+</script>

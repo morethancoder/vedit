@@ -1,0 +1,24 @@
+<!-- vedit
+slots:
+  word: {required: true, help: "the big word or number behind the head"}
+  pre: {help: "small line above it"}
+  color: {help: "colour of the word (default ivory)"}
+-->
+<style>
+      .wrap { position: absolute; left: {{big.left}}px; top: {{big.wrap_top}}px; width: {{big.wrap_w}}px;
+        display: flex; flex-direction: column; align-items: flex-start; }
+      .pre { font: 500 {{big.pre_fs}}px/1.2 {{&font.text}}; color: {{c.accent}}; margin: 0 6px 6px 6px; direction: {{dir}};
+        text-shadow: 0 1px 2px rgba(0,0,0,.6), 0 2px 18px rgba(0,0,0,.5); }
+      .word { font: 700 {{big.fs}}px/1 {{&font.text}}; letter-spacing: {{big.track}}em; color: {{&color}}; white-space: nowrap; direction: ltr;
+        text-shadow: 0 2px 4px rgba(8,8,6,.45), 0 10px 50px rgba(8,8,6,.45); }
+</style>
+        <div class="wrap">{{#pre}}<div class="pre">{{pre}}</div>{{/pre}}<div class="word">{{word}}</div></div>
+<script>
+        // sits inside #cam under the person cut-out, so the head covers its inner letter
+        tl.fromTo(q(".word"), { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.9, ease: "{{m.ease_in}}" }, 0.1);
+{{#pre}}
+        tl.fromTo(q(".pre"), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6, ease: "{{m.ease_in}}" }, 0.35);
+{{/pre}}
+        tl.to(q(".word"), { y: -10, duration: Math.max(D - 1.2, 0.1), ease: "none" }, 1.0);
+        tl.to(q(".wrap"), { opacity: 0, duration: {{m.scene_out}}, ease: "{{m.ease_out}}" }, D - {{m.scene_lead}});
+</script>

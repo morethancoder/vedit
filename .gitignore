@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.egg-info/
+.vedit/
+.playwright/
+.DS_Store
+.pytest_cache/
+.ruff_cache/
+.public/
+
+# generated stand-in for the unpublished speech clip (tests/conftest.py)
+tests/fixtures/clip-ar-10s.*

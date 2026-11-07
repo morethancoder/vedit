@@ -1,0 +1,37 @@
+# T tools/doodles_tele.py _login: log in with a Telegram code, never share it, only on the trusted page; a key
+# gives Claude permission, and it builds and publishes your bots
+about: Telegram login code, don't share it, trusted page only, a key grants Claude permission to build bots
+lang: ar
+beats:
+  login:
+    - {pen: 0.8, float: 4, shapes: [{phone: {at: [1580, 290], w: 180, h: 300}}]}
+    - {pen: 0.6, after: 0.5, shapes: [{telegram: {at: [1580, 290], R: 52}}]}
+    - {text: "سجّل دخول", at: [1580, 490], after: 0.7, size: 58}
+  code:
+    - {pen: 0.9, shapes: [{bubble: {at: [1030, 225], w: 340, h: 130, side: right, fill: true}}]}
+    - {text: "52 714", at: [1200, 290], after: 0.5, size: 66, mono: true, color: accent}
+    - {text: "كود على تيليغرام", at: [1200, 440], after: 0.8, size: 52}
+  noshare:
+    - {pen: 0.8, shapes: [{person: {at: [700, 300], size: 100, fill: true}}]}
+    - {pen: 0.5, after: 0.6, shapes: [{cross: {at: [700, 300], k: 70}}]}
+    - {text: "لا تشاركه مع أحد", at: [700, 460], after: 0.8, size: 54, color: warn}
+  trust:
+    - {pen: 0.9, shapes: [{window: {at: [1200, 540], w: 480, h: 200}}]}
+    - {text: "powertelebot.com", at: [1420, 650], after: 0.6, size: 34, mono: true}
+    - {pen: 0.4, after: 0.9, shapes: [{check: {at: [1620, 700], k: 60, color: accent}}]}
+    - {text: "بس بالصفحة", at: [1440, 805], after: 0.8, size: 50}
+    - {text: "اللي توثق بها", at: [1440, 865], after: 1.2, size: 50}
+  permit:
+    - {pen: 0.8, shapes: [{key: {at: [960, 620]}}]}
+    - {pen: 0.4, after: 0.6, shapes: [{arrow: {a: [835, 620], b: [760, 620], size: 20}}]}
+    - pen: 0.5
+      after: 0.9
+      shapes: [{spark: {at: [690, 620], R: 55}}]
+      spin: {about: [690, 620], rate: 5, after: 1.4}
+    - {text: "صلاحية لـ Claude", at: [830, 760], after: 0.9, size: 52}
+  build:
+    - pen: 1.2
+      shapes:
+        - arrow: {a: [620, 620], b: [540, 620], size: 20}
+        - bot: {at: [[450, 620], [330, 620], [210, 620]], w: 90, h: 80}
+    - {text: "يبني بوتاتك وينشرها", at: [345, 770], after: 0.9, size: 46, color: accent}

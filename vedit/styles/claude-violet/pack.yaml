@@ -1,0 +1,111 @@
+# claude-violet: the Claude Code in Telegram video's look (C hf/design.md + tools/build.py). Editorial serif
+# titles, quiet sans kickers, a turning spark mark, lilac accents over the footage's violet light. C's numbers,
+# tuned there by eye and ear. Defines every v1 type itself; `custom` and anything new fall back to base.
+name: claude-violet
+summary: Claude look in violet; Source Serif titles, DM Sans kickers, spark mark (Claude Code in Telegram)
+keywords: [violet, purple, claude, anthropic, serif, editorial, calm, spark, english, arabic]
+lang: [en, ar]
+
+# C design.md colors; `lilac` is the kicker/rule lilac C's graphics actually use (build.py THEMES/rules)
+colors:
+  accent: "#CDBEFF"   # kickers, highlights, rules; a channel accent replaces it
+  violet: "#7452E8"   # the one brand accent (marks, telegram disc, doodle fills)
+  lilac: "#CDBEFF"
+  tint: "#E7E0FB"     # design.md lilac tint: hairlines, window rings
+  pre: "#E4DAFF"      # big-word pre line, screen captions
+  code: "#DCD0FF"     # inline code in scene steps
+  ivory: "#FAF9F5"
+  paper: "#F0EEE6"
+  ink: "#1C1726"
+  muted: "#5E5670"
+  night: "#150E24"
+  dusk: "#2A1B4D"
+
+# Latin faces are C's own files; JetBrains Mono, Noto Naskh Arabic and IBM Plex Sans Arabic from fontsource
+# (OFL-1.1, see fonts/LICENSES.md). Arabic falls back inside every stack: the serif to Noto Naskh Arabic (a
+# book Naskh with real 400/600/700 and contrast like Source Serif's), the sans to IBM Plex Sans Arabic.
+fonts:
+  - {family: "Source Serif 4", file: fonts/source-serif-4-400.woff2, weight: 400}
+  - {family: "Source Serif 4", file: fonts/source-serif-4-600.woff2, weight: 600}
+  - {family: "Source Serif 4", file: fonts/source-serif-4-400-italic.woff2, weight: 400, style: italic}
+  - {family: "DM Sans", file: fonts/dm-sans-400.woff2, weight: 400}
+  - {family: "DM Sans", file: fonts/dm-sans-500.woff2, weight: 500}
+  - {family: "DM Sans", file: fonts/dm-sans-700.woff2, weight: 700}
+  - {family: "JetBrains Mono", file: fonts/jetbrains-mono-latin-400-normal.woff2, weight: 400}
+  - {family: "JetBrains Mono", file: fonts/jetbrains-mono-latin-700-normal.woff2, weight: 700}
+  - {family: "Caveat", file: fonts/caveat-500.woff2, weight: 500}
+  - {family: "Caveat", file: fonts/caveat-700.woff2, weight: 700}
+  - {family: "Noto Naskh Arabic", file: fonts/noto-naskh-arabic-arabic-400-normal.woff2, weight: 400}
+  - {family: "Noto Naskh Arabic", file: fonts/noto-naskh-arabic-arabic-600-normal.woff2, weight: 600}
+  - {family: "Noto Naskh Arabic", file: fonts/noto-naskh-arabic-arabic-700-normal.woff2, weight: 700}
+  - {family: "IBM Plex Sans Arabic", file: fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2, weight: 400}
+  - {family: "IBM Plex Sans Arabic", file: fonts/ibm-plex-sans-arabic-arabic-500-normal.woff2, weight: 500}
+  - {family: "IBM Plex Sans Arabic", file: fonts/ibm-plex-sans-arabic-arabic-700-normal.woff2, weight: 700}
+font:
+  text: '"DM Sans", "IBM Plex Sans Arabic", sans-serif'           # kickers, subs, labels, body
+  serif: '"Source Serif 4", "Noto Naskh Arabic", serif'           # titles, kinetic lines, big words, URLs
+  mono: '"JetBrains Mono", "IBM Plex Sans Arabic", monospace'     # commands, code
+  hand: '"Caveat", "Noto Naskh Arabic", cursive'                  # doodle lettering
+
+# C build.py THEMES: picked per cue by placement from the brightness behind the graphic (no boxes behind text)
+themes:
+  dark:
+    text: "#FAF9F5"
+    sub: "rgba(250,249,245,.9)"
+    kicker: "#CDBEFF"
+    shadow: "0 1px 2px rgba(0,0,0,.7), 0 2px 14px rgba(0,0,0,.6), 0 0 36px rgba(10,6,20,.5)"
+    spark: "#C4B2FF"
+    octo: "#FAF9F5"
+    tg: "#7452E8"
+    tg_plane: "#FAF9F5"
+    code: "#FAF9F5"
+    prompt: "#B9A5FF"
+  light:
+    text: "#1C1726"
+    sub: "#3B3350"
+    kicker: "#5A3BD0"
+    shadow: "0 1px 2px rgba(255,255,255,.7), 0 0 18px rgba(250,249,245,.8)"
+    spark: "#6A47E0"
+    octo: "#1C1726"
+    tg: "#7452E8"
+    tg_plane: "#FAF9F5"
+    code: "#1C1726"
+    prompt: "#5A3BD0"
+# C BUSY_SHADOW: over a busy screen layout a denser halo keeps the letters readable (with the feathered blur)
+busy_shadow: "0 1px 2px rgba(0,0,0,.85), 0 0 6px rgba(0,0,0,.75), 0 2px 18px rgba(0,0,0,.75), 0 0 44px rgba(10,6,20,.7)"
+
+# C motion (design.md: calm 0.5-0.7 s power3.out entrances, 0.35 s power2.in exits, small y offsets)
+motion:
+  ease_in: power3.out
+  ease_out: power2.in
+  ease_draw: power2.inOut
+  ease_pop: back.out(1.7)
+  in: 0.55
+  out: 0.35
+  out_lead: 0.42
+  scene_out: 0.45
+  scene_lead: 0.55
+  stagger: 0.08
+  rise: 16
+
+# big word: Source Serif 4 600 advances (C tools/serif600-advances.json) and C's BIG_TRACK
+advances: serif600-advances.json
+big: {track: -0.04, min_px: 110, max_px: 300, tuck: 0.45}
+
+# the spark lands with a turn and keeps drifting while on screen (C logo_motion)
+logo_motion: {spin: [spark]}
+
+# C index(): the A-roll under full-frame moments
+focus: {blur: 20, brightness: 0.42, in: 0.3, out: 0.35}
+
+# C SFX: cue kind -> [sound, gain]; gains land ~18 dB under the voice (program -16.4 LUFS)
+sfx:
+  label: [click-soft, 0.30]
+  chip: [key-press, 0.55]
+  kinetic: [pop, 0.16]
+  big-number: [whoosh-short, 0.11]
+  focus: [whoosh-short, 0.13]
+  beat: [click-soft, 0.16]
+  url: [click, 0.38]
+  phone: [whoosh-short, 0.11]
+sfx_files: {click-soft: 0.37, click: 0.37, key-press: 0.4, pop: 0.72, whoosh-short: 0.57}

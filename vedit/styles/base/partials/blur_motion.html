@@ -1,0 +1,5 @@
+<!-- T blur_motion: the blur fades on its own element, in with the text and out before it -->
+<script>
+        tl.fromTo(q(".blurbg"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.02);
+        tl.to(q(".blurbg"), { opacity: 0, duration: {{m.out}}, ease: "{{m.ease_out}}" }, D - {{m.out_lead}});
+</script>

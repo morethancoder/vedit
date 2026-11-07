@@ -1,0 +1,29 @@
+# T tools/doodles_tele.py _chart: bots, programs, a CMS site; from 200K to 1.7M within 2-3 years
+about: tools along the top, a growth line from 200K to 1.7M over 2-3 years
+lang: ar
+beats:
+  tools:
+    - pen: 1.1
+      shapes:
+        - bot: {at: [520, 265], w: 110, h: 96}
+        - window: {at: [890, 215], w: 140, h: 100, bar: 30}
+        - window: {at: [1330, 215], w: 140, h: 100, bar: 30}
+        - line: {pts: [[1360, 270], [1440, 270]], lw: 0.7, amp: 0.4, color: soft}
+        - line: {pts: [[1360, 292], [1410, 292]], lw: 0.7, amp: 0.4, color: soft}
+    - {text: "بوتات", at: [520, 385], after: 0.4, size: 52}
+    - {text: "برامج", at: [960, 385], after: 0.7, size: 52}
+    - {text: "موقع CMS", at: [1400, 385], after: 1.0, size: 52}
+  start:
+    - pen: 0.8
+      shapes:
+        - line: {pts: [[400, 490], [400, 850], [1560, 850]], amp: 1.0, bow: 0}
+        - head: {at: [1560, 850], dir: [1, 0], size: 20, lw: 0.9}
+        - head: {at: [400, 490], dir: [0, -1], size: 20, lw: 0.9}
+        - dot: {at: [480, 770], r: 12, color: accent}
+    - {text: "200K", at: [520, 700], after: 0.5, size: 84}
+  end:
+    - {pen: 1.2, shapes: [{trend: {at: [480, 770], length: 950, rise: 215, wiggle: 11}}]}
+    - {text: "1.7M", at: [1580, 520], after: 0.9, size: 110, color: accent}
+  years:
+    - {pen: 0.4, shapes: [{line: {pts: [[800, 952], [1120, 950]], color: soft, lw: 0.8, amp: 1.2}}]}
+    - {text: "خلال ٢–٣ سنين", at: [960, 900], after: 0.3, size: 58}

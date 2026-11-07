@@ -1,0 +1,19 @@
+# T tools/doodles_tele.py _request: the 365-days group asks for a Telegram bots tutorial; I didn't know what one was
+about: a group asks "can you explain Telegram bots?"; import telebot; I didn't know what a bot was
+lang: ar
+beats:
+  group:
+    - {pen: 1.0, float: 4, shapes: [{people: {at: [1500, 420], size: 112}}]}
+    - {text: "جروب ٣٦٥ يوم برمجة", at: [1500, 640], after: 0.6, size: 56}
+  msg:
+    - {pen: 0.9, shapes: [{bubble: {at: [740, 220], w: 560, h: 220, side: right, fill: true}}]}
+    - {text: "تسوي شرح عن بوتات", at: [1020, 295], after: 0.5, size: 52}
+    - {text: "تيليغرام؟", at: [1020, 370], after: 0.9, size: 52}
+  telebot:
+    - {text: "import telebot", at: [1020, 570], size: 46, mono: true, color: accent}
+    - {text: "{ }", at: [1020, 660], after: 0.5, size: 96, mono: true, color: soft}
+  question:
+    - {pen: 0.9, float: 4, shapes: [{person: {at: [330, 480], size: 120, fill: true}}]}
+    - {pen: 0.7, after: 0.5, shapes: [{qmark: {at: [330, 215], r: 46}}]}
+    - {text: "ما كنت أعرف شنو", at: [330, 700], after: 0.8, size: 54}
+    - {text: "بوت تيليغرام!", at: [330, 770], after: 1.2, size: 54}

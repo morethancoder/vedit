@@ -1,0 +1,32 @@
+# T tools/doodles_tele.py _broadcast: the bot broadcasts to every user's DM, which reaches better than a post
+about: a bot with a megaphone fans arrows out to users' DMs, better than a channel post
+lang: ar
+beats:
+  bot:
+    - {pen: 1.0, float: 4, shapes: [{bot: {at: [1480, 570], w: 200, h: 176}}]}
+    - {pen: 0.8, after: 0.7, shapes: [{megaphone: {at: [1470, 265], size: 120}}]}
+    - {text: "البوت", at: [1480, 760], after: 0.8, size: 64}
+  users:
+    - {pen: 1.0, shapes: [{person: {at: [[360, 250], [360, 410], [360, 570], [360, 730]], size: 50, fill: true}}]}
+  broadcast:
+    - pen: 1.0
+      shapes:
+        - arrow: {a: [1340, 575], b: [590, 250], size: 20, lw: 0.85}
+        - arrow: {a: [1340, 575], b: [590, 410], size: 20, lw: 0.85}
+        - arrow: {a: [1340, 575], b: [590, 570], size: 20, lw: 0.85}
+        - arrow: {a: [1340, 575], b: [590, 730], size: 20, lw: 0.85}
+    - {text: "إذاعة", at: [1000, 330], after: 0.4, size: 76, color: accent}
+  dm:
+    - pen: 1.0
+      shapes:
+        - bubble: {at: [[445, 214], [445, 374], [445, 534], [445, 694]], w: 100, h: 50, side: left, fill: true, lw: 0.8}
+    - {text: "توصل على الخاص", at: [400, 860], after: 0.5, size: 54}
+  better:
+    - pen: 0.8
+      shapes:
+        - telegram: {at: [1250, 190], R: 42}
+        - curve: {a: [1195, 190], via: [1080, 160], b: [985, 190], dashed: true, color: soft, lw: 0.8}
+        - head: {at: [985, 190], dir: [-1, 0.3], size: 18, color: soft, lw: 0.8}
+    - {text: "بدل منشور بالقناة", at: [770, 190], after: 0.5, size: 46, color: soft}
+    - {pen: 0.5, after: 0.7, shapes: [{check: {at: [690, 860], k: 100, color: accent}}]}
+    - {text: "توصل أفضل", at: [880, 860], after: 1.0, size: 58, color: accent}

@@ -1,0 +1,21 @@
+# T tools/doodles_tele.py _experience: 4 years of experience; handles high load, many bots at once, stats, broadcast
+about: four years of experience - a load gauge, many bots at once, statistics, smooth broadcast
+lang: ar
+beats:
+  load:
+    - {text: "خبرة ٤ سنين", at: [960, 175], size: 90, color: accent}
+    - {pen: 1.0, after: 0.5, float: 4, shapes: [{gauge: {at: [1350, 450], R: 125}}]}
+    - {text: "يتحمل ضغط عالي", at: [1350, 545], after: 1.1, size: 54}
+  many:
+    - pen: 1.1
+      shapes:
+        - bot: {at: [490, 415], w: 110, h: 96, face: null}
+        - bot: {at: [650, 415], w: 110, h: 96, face: null}
+        - bot: {at: [570, 400], w: 120, h: 104}
+    - {text: "عدة بوتات بنفس الوقت", at: [570, 545], after: 0.8, size: 54}
+  stats:
+    - {pen: 1.0, shapes: [{barchart: {at: [1230, 640], w: 240, h: 170}}]}
+    - {text: "إحصائيات", at: [1350, 890], after: 0.6, size: 58}
+  broadcast:
+    - {pen: 1.0, shapes: [{megaphone: {at: [560, 725], size: 150}}]}
+    - {text: "براودكاست سلس", at: [570, 890], after: 0.6, size: 54}

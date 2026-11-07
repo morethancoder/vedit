@@ -1,0 +1,36 @@
+# T tools/doodles_tele.py _flood: thousands of messages hit the bot in the same second, and it crashed
+about: a bot flooded by thousands of messages in one second crashes
+lang: ar
+beats:
+  bot:
+    - {pen: 1.0, float: 4, shapes: [{bot: {at: [500, 570], w: 240, h: 210}}]}
+    - {text: "البوت", at: [500, 790], after: 0.6, size: 64}
+  flood:
+    - pen: 1.2
+      shapes:
+        - envelope:
+            w: 64
+            jitter: 8
+            at: [[1700, 440], [1590, 440], [1480, 440], [1370, 440], [1260, 440],
+                 [1700, 530], [1590, 530], [1480, 530], [1370, 530], [1260, 530],
+                 [1700, 620], [1590, 620], [1480, 620], [1370, 620], [1260, 620],
+                 [1700, 710], [1590, 710], [1480, 710], [1370, 710], [1260, 710]]
+    - pen: 0.9
+      after: 0.7
+      shapes:
+        - arrow: {a: [1200, 440], b: [760, 440], size: 18, lw: 0.8}
+        - arrow: {a: [1200, 530], b: [760, 530], size: 18, lw: 0.8}
+        - arrow: {a: [1200, 620], b: [760, 620], size: 18, lw: 0.8}
+        - arrow: {a: [1200, 710], b: [760, 710], size: 18, lw: 0.8}
+    - {text: "آلاف الرسائل", at: [1480, 830], after: 0.8, size: 62}
+  second:
+    - {pen: 0.8, shapes: [{stopwatch: {at: [1000, 245], R: 72}}]}
+    - {text: "1s", at: [1000, 252], after: 0.5, size: 44, mono: true, color: accent}
+    - {text: "بنفس الثانية", at: [1330, 245], after: 0.6, size: 60}
+  crash:
+    - pen: 0.8
+      shapes:
+        - burst: {at: [500, 570], r0: 170, r1: 235, a0: 189, a1: 351, n: 8}
+        - crack: {pts: [[500, 468], [478, 520], [516, 548], [484, 592], [520, 640]]}
+        - cross: {at: [360, 440], k: 26}
+    - {text: "طاح!", at: [500, 880], after: 0.5, size: 110, color: warn}

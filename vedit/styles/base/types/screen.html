@@ -1,0 +1,39 @@
+<!-- vedit
+slots:
+  source: {required: true, help: "a source id from project.yaml (a screen recording)"}
+  from: {kind: number, help: "seconds into the recording to start from"}
+  kicker: {}
+  title: {}
+  steps: {kind: list, help: "numbered lines beside the recording"}
+-->
+<style>
+      .scene { position: absolute; inset: 0; }
+      .left { position: absolute; left: 150px; top: 0; bottom: 0; width: 560px; display: flex; flex-direction: column; justify-content: center; }
+      .hd { display: flex; flex-direction: column; gap: 16px; }
+      .hd .title { color: {{c.ivory}}; font-size: 56px; line-height: 1.06; }
+      .steps { display: flex; flex-direction: column; gap: 18px; margin-top: 34px; }
+      .step { display: flex; align-items: center; gap: 18px; }
+      .num { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 2px solid {{c.accent}}; color: {{c.ivory}};
+        font: 700 20px/36px {{&font.text}}; text-align: center; }
+      .step span { font: 400 28px/1.3 {{&font.ui}}; color: {{c.ivory}}; text-shadow: 0 2px 12px rgba(0,0,0,.5); }
+      .one { position: absolute; right: 110px; top: {{video.top}}px; }
+      .win { position: relative; width: {{video.w}}px; height: {{video.h}}px; border-radius: 18px; overflow: hidden; background: #000;
+        box-shadow: 0 40px 90px rgba(5,4,2,.55), 0 0 0 1px rgba(250,249,245,.16); }
+      .win video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+</style>
+        <div class="scene">
+          <div class="left" dir="{{dir}}">
+            <div class="hd">{{#kicker}}<div class="kicker">{{kicker}}</div>{{/kicker}}{{#title}}<div class="title">{{title}}</div>{{/title}}</div>
+            <div class="steps">{{#steps}}<div class="step"><div class="num">{{n}}</div><span>{{text}}</span></div>{{/steps}}</div>
+          </div>
+          <div class="one"><div class="win"><video id="{{id}}-v" src="{{video.src}}" muted playsinline data-start="0" data-media-start="{{video.from}}" data-duration="{{dur}}" data-track-index="0"></video></div></div>
+        </div>
+<script>
+        // T broll2 over the blurred A-roll: heading, the recording, steps spread over the first half
+        tl.fromTo(q(".hd"), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "{{m.ease_in}}" }, 0.3);
+        tl.fromTo(q(".one"), { opacity: 0, y: 50, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "{{m.ease_in}}" }, 0.35);
+        const steps = qa(".step"), last = Math.min(D * 0.45, 7.0);
+        steps.forEach((el, i) => tl.fromTo(el, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.5, ease: "{{m.ease_in}}" },
+          steps.length > 1 ? 1.2 + (last - 1.2) * i / (steps.length - 1) : 1.2));
+        tl.to(q(".scene"), { opacity: 0, duration: {{m.scene_out}}, ease: "{{m.ease_out}}" }, D - {{m.scene_lead}});
+</script>

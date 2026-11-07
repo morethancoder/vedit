@@ -1,0 +1,34 @@
+<!-- vedit
+slots:
+  words: {required: true, help: "the line as shown; each word appears on its spoken word from `at` on"}
+  highlight: {kind: list, help: "shown words in the accent colour"}
+  center: {kind: bool, help: "big and centred (an opening line)"}
+-->
+<style>
+      /* C kinetic: Source Serif 600, tight tracking; highlighted words lilac italic 400 (Arabic: lilac, upright) */
+{{#center}}
+      .wrap { position: absolute; left: 160px; right: 160px; top: 0; bottom: 0; justify-content: center; display: flex; align-items: center; }
+      .line { text-align: center; font-size: 128px; }
+{{/center}}
+{{^center}}
+      .wrap { position: absolute; {{#left}}left{{/left}}{{#right}}right{{/right}}: 150px; top: 0; bottom: 0; width: {{width}}px;
+        justify-content: {{#left}}flex-start{{/left}}{{#right}}flex-end{{/right}}; display: flex; align-items: center; }
+      .line { text-align: {{side}}; font-size: 84px; }
+{{/center}}
+      .kin { position: relative; }
+      .line { position: relative; margin: 0; font-weight: 600; line-height: 1.06; letter-spacing: -.025em; font-family: {{&font.serif}};
+        color: {{th.text}}; text-shadow: {{&th.shadow}}; }
+      .line[dir="rtl"] { letter-spacing: 0; line-height: 1.3; font-weight: 700; }
+      .line[dir="rtl"] .w.hl { font-weight: 600; }
+      .w { display: inline-block; }
+      .w.hl { color: {{th.kicker}}; font-style: italic; font-weight: 400; }
+{{#blur}}{{&part.blur_css}}{{/blur}}
+</style>
+        <div class="wrap"><div class="kin">{{#blur}}<div class="blurbg"></div>{{/blur}}<p class="line" dir="{{dir}}">{{#words}}<span class="w{{#hl}} hl{{/hl}}">{{w}}</span> {{/words}}</p></div></div>
+<script>
+        // each shown word lands on its spoken word (engine: `words[].at`, seconds into the cue)
+        const at = [{{#words}}{{at}}, {{/words}}];
+        qa(".w").forEach((el, i) => tl.fromTo(el, { opacity: 0, y: 26, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.32, ease: "{{m.ease_in}}" }, at[i]));
+        tl.to(qa(".w"), { opacity: 0, y: -12, duration: {{m.out}}, ease: "{{m.ease_out}}" }, D - {{m.out_lead}});
+{{#blur}}{{&part.blur_motion}}{{/blur}}
+</script>

@@ -1,0 +1,40 @@
+# T tools/doodles_tele.py _funnel: a video about the bot, thousands of followers from TikTok/Instagram/X pour
+# into Telegram, and the bot buckles under the load
+about: followers from TikTok, Instagram and X all go to Telegram and overload the bot
+lang: ar
+beats:
+  post:
+    - pen: 1.0
+      float: 4
+      shapes:
+        - person: {at: [1610, 380], size: 100, fill: true}
+        - play_phone: {at: [1480, 450], w: 96, h: 170}
+    - {text: "فيديو عن البوت", at: [1590, 640], after: 0.6, size: 54}
+  followers:
+    - {pen: 1.0, shapes: [{people: {at: [1190, 400], size: 80}}]}
+    - {text: "آلاف المتابعين", at: [1190, 600], after: 0.6, size: 54}
+  platforms:
+    - pen: 0.8
+      shapes:
+        - social: {at: [1050, 300], kind: tiktok}
+        - social: {at: [1050, 410], kind: instagram}
+        - social: {at: [1050, 520], kind: x}
+    - {text: "TikTok", at: [1005, 300], after: 0.3, size: 54, anchor: end}
+    - {text: "Instagram", at: [1005, 410], after: 0.55, size: 54, anchor: end}
+    - {text: "X", at: [1005, 520], after: 0.8, size: 54, anchor: end}
+  telegram:
+    - pen: 0.6
+      shapes:
+        - arrow: {a: [790, 300], b: [725, 426], size: 16, lw: 0.8}
+        - arrow: {a: [790, 410], b: [725, 450], size: 16, lw: 0.8}
+        - arrow: {a: [790, 520], b: [725, 474], size: 16, lw: 0.8}
+    - {pen: 0.8, after: 0.3, float: 4, shapes: [{telegram: {at: [640, 450], R: 82}}]}
+    - {text: "تيليغرام", at: [640, 580], after: 0.8, size: 56}
+  crash:
+    - pen: 0.9
+      shapes:
+        - arrow: {a: [540, 450], b: [410, 450], size: 22, color: warn}
+        - bot: {at: [300, 450], w: 150, h: 130}
+        - burst: {at: [300, 450], r0: 110, r1: 160, a0: 189, a1: 351, n: 7}
+        - cross: {at: [210, 330], k: 20}
+    - {text: "ضغط عالي جداً", at: [310, 620], after: 0.6, size: 52, color: warn}

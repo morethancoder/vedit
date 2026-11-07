@@ -1,0 +1,79 @@
+# The specimen: the same sample cues for every pack, so any two packs compare on the same content
+# (vedit style try / compare). The pack's first `lang` picks the text (ar or en; others use en).
+#
+# tile keys: id (unique), type (a v1 cue type), dur (seconds on the specimen timeline), snap (the second of the
+# graphic shown on the sheet; default dur - 1), side (left|right), theme (dark|light), bg (dark|light backdrop),
+# beats (doodle element -> seconds into the graphic), fields.<lang> (the cue's fields, checked against the slots).
+# `custom` is not here: it is the project's own HTML, not the pack's.
+plug: # the plug preset (custom/plug/plug.yaml) the specimen project gets
+  ar: {name: vedit, kicker: "أداة تحرير الفيديو", url: vedit.dev, trial: "جرّبه مجاناً لمدة ٧ أيام"}
+  en: {name: vedit, kicker: "the video editing tool", url: vedit.dev, trial: "free for 7 days"}
+
+tiles:
+  - id: label
+    type: label
+    dur: 4
+    side: left
+    fields:
+      ar: {logo: telegram, kicker: "قبل أربع سنين", title: "فتحت قناتي الأولى", sub: "بدون أي خبرة سابقة"}
+      en: {logo: telegram, kicker: "four years ago", title: "I opened my first channel", sub: "with zero experience"}
+  - id: label-light
+    type: label
+    dur: 4
+    side: right
+    theme: light
+    bg: light
+    fields:
+      ar: {logo: spark, kicker: "الخطوة الأولى", title: "اكتب الفكرة"}
+      en: {logo: spark, kicker: "step one", title: "write the idea down"}
+  - id: chip
+    type: chip
+    dur: 5
+    side: left
+    fields:
+      ar: {label: "اكتب في البوت", code: "سوّي لي ملخص للحلقة"}
+      en: {label: "type in the bot", code: "vedit build --plan"}
+  - id: kinetic
+    type: kinetic
+    dur: 4.5
+    side: left
+    fields:
+      ar: {words: "كل شي بدأ من فكرة صغيرة", highlight: ["فكرة صغيرة"]}
+      en: {words: "it all started with one small idea", highlight: ["small idea"]}
+  - id: big-number
+    type: big-number
+    dur: 4
+    fields:
+      ar: {word: "1.7M", pre: "أكثر من", color: accent}
+      en: {word: "1.7M", pre: "more than", color: accent}
+  - id: chapter
+    type: chapter
+    dur: 4
+    fields:
+      ar: {title: "النمو", kicker: "الفصل الثاني", logo: octopus}
+      en: {title: "Growth", kicker: "chapter two", logo: octopus}
+  - id: doodle
+    type: doodle
+    dur: 5
+    beats: {chart: 0.6, arrow: 1.6, people: 2.6}
+    fields:
+      ar:
+        scene: {layout: row, elements: [{beat: chart, id: chart, barchart: {}, label: "القناة"}, {beat: people, id: people, people: {}, label: "الناس"}, {beat: arrow, arrow: {from: chart, to: people}, label: "كبرت"}]}
+        beats: {chart: "القناة", arrow: "كبرت", people: "الناس"}
+      en:
+        scene: {layout: row, elements: [{beat: chart, id: chart, barchart: {}, label: "the channel"}, {beat: people, id: people, people: {}, label: "people"}, {beat: arrow, arrow: {from: chart, to: people}, label: "grew"}]}
+        beats: {chart: "the channel", arrow: "grew", people: "people"}
+  - id: screen
+    type: screen
+    dur: 5
+    fields:
+      ar: {source: specimen, kicker: "الشرح", title: "كيف يشتغل", steps: ["افتح البوت", "اكتب طلبك", "استلم الملف"]}
+      en: {source: specimen, kicker: "walkthrough", title: "How it works", steps: ["open the bot", "type the ask", "get the file"]}
+  - id: plug
+    type: plug
+    dur: 8
+    snap: 7.2
+    fields: {ar: {}, en: {}}
+
+# the ~10 s motion clip (--clip): tile id -> seconds on screen, played one after another
+clip: {kinetic: 3, label: 2.5, chip: 2.5, big-number: 2.5}

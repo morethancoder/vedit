@@ -1,7 +1,7 @@
 [project]
 name = "vedit"
 version = "0.1.0"
-description = "Agent-first video editing CLI"
+description = "Agent-first CLI that edits recordings of someone speaking into finished videos and short-form clips"
 requires-python = ">=3.12"
 dependencies = [
   "pyyaml",

@@ -4,8 +4,18 @@ next: vedit status
 ---
 # vedit
 
-vedit turns a talk recording (any video file) into a finished YouTube edit: cleaned-up cut, motion
-graphics, subtitles, a 4K60 master. Code owns the mechanics. You own the creative calls, written as data.
+vedit turns a recording of someone speaking (any video file) into a finished edit: cleaned-up cut, motion
+graphics, subtitles, a 4K60 master, plus short clips for Reels, Shorts, TikTok, stories and feed posts.
+Code owns the mechanics. You own the creative calls, written as data.
+
+## Is vedit the right tool
+
+- Fits: a talk, tutorial, podcast or vlog recording (Arabic or English) that needs a cut, graphics,
+  subtitles or short-form clips. Best with the speaker on camera.
+- Does not fit: a video with no recorded speech (ad, launch film, music video, motion graphic, generated or
+  faceless explainer, montage). Build those in HyperFrames directly.
+- Does not fit: a single ffmpeg job (trim, convert, compress).
+- Why: cuts come from the transcript, graphics are anchored to spoken words, framing follows the face.
 
 ## The edit loop
 

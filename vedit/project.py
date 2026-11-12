@@ -29,7 +29,8 @@ KEYS = {
 REQUIRED = ("slug", "lang", "sources")
 SOURCE_KEYS = {"file", "camera", "trims", "fps", "mirror", "origin", "importer", "punch"}
 OUTPUT_KINDS = ("master", "clip", "short", "story", "post")
-OUTPUT_KEYS = {"id", "kind", "aspect", "platforms", "range", "captions"}
+OUTPUT_KEYS = {"id", "kind", "aspect", "platforms", "range", "captions", "fill"}
+FILLS = ("plain", "blur")  # behind full-frame scenes in an output; never blur by default
 RANGE_KEYS = {"from", "to", "near"}
 CAPTIONS = ("burned", "srt", "none")
 DEFAULT_PLATFORMS = {"master": ["youtube"], "clip": ["instagram-reels", "tiktok", "youtube-shorts"],
@@ -79,6 +80,7 @@ class Output:
     platforms: list[str] = field(default_factory=lambda: ["youtube"])
     range: dict | None = None  # clips: {"from": words, "to": words, "near": "A 245"}
     captions: str = "srt"
+    fill: str = "plain"
 
     @property
     def vertical(self) -> bool:
@@ -89,6 +91,8 @@ class Output:
         if self.range:
             d["range"] = dict(self.range)
         d["captions"] = self.captions
+        if self.fill != "plain":
+            d["fill"] = self.fill
         return d
 
 
@@ -161,7 +165,10 @@ def parse_outputs(raw, fname: Path | str) -> list[Output]:
         caps = spec.get("captions", "srt" if kind == "master" else "burned")
         if caps not in CAPTIONS:
             raise ProjectError(f"{fname}: {where}.captions is '{caps}'; use one of: {', '.join(CAPTIONS)}.")
-        out.append(Output(oid, kind, aspect, list(plats), rng, caps))
+        fill = spec.get("fill", "plain")
+        if fill not in FILLS:
+            raise ProjectError(f"{fname}: {where}.fill is '{fill}'; use one of: {', '.join(FILLS)}.")
+        out.append(Output(oid, kind, aspect, list(plats), rng, caps, fill))
     return out
 
 

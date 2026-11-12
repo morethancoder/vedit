@@ -189,3 +189,18 @@ def test_preview_project_is_written_without_rendering(tmp_path):
 
 
 GOLDEN_FLOOD = "aa8bbcf10549a984"
+
+
+def test_pages_keep_labels_readable_in_a_small_panel():
+    from vedit.doodles import library
+    from vedit.doodles import spec as dspec
+
+    sp, _ = library.resolve("funnel")
+    pgs = dspec.pages(sp, 578, 504)
+    assert len(pgs) > 1
+    assert [n for pg in pgs for n in pg["beats"]] == list(sp["beats"])  # every beat once, in order
+    for pg in pgs:
+        b = dspec.content_box(pg, pad=24)
+        k = min(578 / (b[2] - b[0]), 504 / (b[3] - b[1]))
+        assert dspec._min_label(pg["beats"]) * k >= 38 - 0.5
+    assert dspec.pages(sp, 4000, 3000) == [sp]  # room enough: one page, the scene untouched

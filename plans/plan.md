@@ -38,7 +38,7 @@ formats, pipeline, studio, models, traps, sources).
 - [`phase-03-cut/step.md`](phase-03-cut/step.md) — `cuts.yaml`, listening refine, incremental program, `joins`, `listen`
 - [`phase-04-graphics/step.md`](phase-04-graphics/step.md) — `cues.yaml` anchored to words, faces, placement, `build`
 - [`phase-05-styles/step.md`](phase-05-styles/step.md) — style pack format, two packs, doodle library, custom cues, style library, style authoring
-- [`phase-06-studio/step.md`](phase-06-studio/step.md) [P] — video cut-out in Studio (parallel with phases 02–05; separate repo)
+- [`phase-06-studio/step.md`](phase-06-studio/step.md) [P] — what vedit needs from Studio; planned in Studio `plans/phase-20-vedit/` (video cut-out merge, batch transcribe)
 - [`phase-07-llm/step.md`](phase-07-llm/step.md) [P] — model router, prompts, `summarize`, `propose-cuts` (parallel with 03–05, after 02)
 - [`phase-08-output/step.md`](phase-08-output/step.md) — `review`, `draft`, `subs`, `render`, `clean`
 - [`phase-09-acceptance/step.md`](phase-09-acceptance/step.md) — rebuild the Telegram video, rewrite the skill

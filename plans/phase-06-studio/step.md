@@ -2,16 +2,16 @@
 
 Add the local-AI capabilities vedit needs to Studio (`~/Projects/New/studio`), so no model lives in vedit.
 
+**The work is planned in Studio:** [`~/Projects/New/studio/plans/phase-20-vedit/`](../../../../New/studio/plans/phase-20-vedit/step.md)
+(moved there 2026-11-08; Studio work follows Studio's CLAUDE.md and plans). This file only says what vedit needs.
+
 Done when:
-- [x] `studio cutout VIDEO` returns an alpha video of the main person, used by vedit's cut-outs
-- [ ] vedit has no `# TEMP(studio-cutout)` markers left (the old-Studio fallback still carries them, 2026-11-05)
-
-## Children
-
-- [`feature-video-cutout.md`](feature-video-cutout.md) — person matte for video in Studio
-- [`feature-batch-transcribe.md`](feature-batch-transcribe.md) [P] — optional: many short clips in one job
+- [ ] `studio cutout VIDEO` is merged in Studio main and used by vedit's cut-outs (built on Studio branch
+      `vedit/video-cutout`, not merged; Studio leaf `feature-video-cutout.md`)
+- [ ] vedit has no `# TEMP(studio-cutout)` markers left (six in `vedit/graphics/cutouts.py`)
+- [ ] optional: refine and listen use `studio transcribe --batch` when present (Studio leaf
+      `feature-batch-transcribe.md`), keeping the one-WAV splice as fallback
 
 ## Refs
 
-- work happens in the Studio repo, following its own CLAUDE.md and plans; this phase tracks what vedit needs
 - `../../docs/studio.md`

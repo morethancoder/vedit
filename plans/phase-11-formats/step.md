@@ -27,6 +27,7 @@ Done when:
 - [`feature-hud-check.md`](feature-hud-check.md) — review flags anything in a HUD; HUD mock on sheets and drafts
 - [`feature-stories.md`](feature-stories.md) — split a story output into platform-length segments
 - [`feature-render-outputs.md`](feature-render-outputs.md) — draft and render per output
+- [`feature-vertical.md`](feature-vertical.md) — vertical recordings as shot; canvas fill plain/blur/shader
 
 ## Refs
 

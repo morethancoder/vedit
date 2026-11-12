@@ -16,9 +16,11 @@ vedit is built to run with no human watching. Five rules:
    "exit"}`. Codes and exits are in `vedit guide errors`: `busy` (3) → `vedit wait`; `not_built` / `stale`
    (4) → run `next`; `bad_input` (4) → fix the file named in `error`; `missing_tool` / `no_disk` (5) →
    `vedit doctor` / `vedit clean`; `timeout` (124) → rerun, long stages resume.
-4. **Preview what costs time or disk.** `--dry-run` on `render`, `draft` and `clean` reports what would run
-   (chunks to render vs reused, disk needed, files to delete) and changes nothing. Other commands reject the
-   flag with `usage`.
+4. **Preview what costs time or disk.** `--dry-run` reports what would run and writes nothing: `new` (files and
+   media to build vs reuse), `cut` (cuts, boundaries to listen to, program pieces to render vs reused), `build`
+   (pages to write, cut-outs to make), `subs` (batches to ask the model vs cached), `draft`/`render` (chunks,
+   disk needed), `clean` (files to delete). `data.model_calls` counts Studio or model calls. Other commands
+   reject the flag with `usage`.
 5. **Never sleep-poll a job.** Long stages (`render`, `cut`, `transcribe`, `joins`) detach. `vedit wait
    --timeout S --json` blocks until the job ends: exit 0 done, 1 failed, 124 timed out (the job keeps running;
    call `wait` again). `--events` streams NDJSON progress on stderr: `{"t", "stage", "state", "chunk",

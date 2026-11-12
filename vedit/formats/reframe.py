@@ -3,8 +3,9 @@
 The crop is full height and as wide as the target aspect allows (9:16 keeps 608 of 1920 px). Its centre
 follows the face track like a camera operator would:
 
+- each piece starts centred on its face (the median over its first seconds, so one odd sample can't skew it);
 - holds still while the face stays inside a dead zone around the crop centre (no jitter on small moves);
-- when the face leaves the zone, eases towards it (a smoothed follow, about 1 s to settle);
+- when the face leaves the zone, eases until the face is centred again (not just back inside the zone);
 - on a join (a jump cut) it cuts with the picture: the new piece starts centred on its own face;
 - never cuts the face: the face box is pulled fully inside the crop when it fits;
 - a piece that moves less than STILL px in total is held at one position.
@@ -26,10 +27,20 @@ from vedit.run import hash_of
 
 SRC_W, SRC_H = 1920, 1080  # face boxes and the crop live in the 1080p proxy's pixels
 STEP = 0.25  # seconds between path points (the face track's rate)
-DEAD = 0.18  # dead zone: face centre may drift this share of the crop width from its centre before it moves
-EASE = 0.22  # per step, the share of the remaining distance covered while following (~1 s to settle)
+DEAD = 0.08  # dead zone: face centre may drift this share of the crop width from its centre before it moves
+SETTLE = 0.02  # a follow stops once the face is this close to the centre
+WINDOW = 4  # samples each side of the rolling median that the follow aims at (about 1 s each way)
+EASE = 0.35  # per step, the share of the remaining distance covered while following (~1 s to settle)
 STILL = 24.0  # px: a piece whose path moves less than this in total is held still
-PARAMS = {"step": STEP, "dead": DEAD, "ease": EASE, "still": STILL, "v": 1}
+PARAMS = {
+    "step": STEP,
+    "dead": DEAD,
+    "ease": EASE,
+    "still": STILL,
+    "settle": SETTLE,
+    "window": WINDOW,
+    "v": 2,
+}
 
 
 def crop_width(aspect: str, src=(SRC_W, SRC_H)) -> float:
@@ -59,14 +70,20 @@ def path(track, edl, t0: float, t1: float, aspect: str) -> list[dict]:
         n = max(1, int(np.ceil((b - a) / STEP)))
         ts = [a + k * (b - a) / n for k in range(n + 1)]
         faces = [_face_cx(track, t) for t in ts]
-        first = next((c for c, _ in faces if c is not None), SRC_W / 2)
-        centre = first
+        cxs = [c for c, _ in faces]
+        seen = [c for c in cxs if c is not None]
+        centre = float(np.median(seen)) if seen else SRC_W / 2
+        following = False
         xs = []
-        for cx, box in faces:
-            if cx is not None:
-                off = cx - centre
-                if abs(off) > DEAD * cw:  # outside the dead zone: ease toward the face
-                    centre += EASE * (off - np.sign(off) * DEAD * cw)
+        for k, (_cx, box) in enumerate(faces):
+            near = [c for c in cxs[max(0, k - WINDOW) : k + WINDOW + 1] if c is not None]
+            if near:
+                off = float(np.median(near)) - centre
+                if abs(off) > DEAD * cw:  # out of the dead zone: follow until the face is centred again
+                    following = True
+                if following:
+                    centre += EASE * off
+                    following = abs(off) > SETTLE * cw
             x = min(hi, max(lo, centre - cw / 2))
             if box and box[2] <= cw:  # keep the whole face inside the crop
                 x = min(max(x, box[0] + box[2] - cw), box[0])

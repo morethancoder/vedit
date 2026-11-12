@@ -1,14 +1,20 @@
 ---
 name: vedit
-description: Edit a talk recording into a finished YouTube video with the vedit CLI (cut pauses and mistakes, add word-anchored motion graphics and subtitles, render 4K60). Use when asked to edit, cut, caption or render a recording, or to pick or build a graphics style.
+description: Edit a recording of someone speaking (talk, tutorial, podcast, vlog) into a finished video with the vedit CLI (cut pauses and mistakes, add word-anchored motion graphics and subtitles, render 4K60, cut Reels/Shorts/TikTok/story/feed clips). Use when asked to edit, cut, caption, clip or render a recording, or to pick or build a graphics style. Not for videos with no recorded speech (ads, launch films, music videos, motion graphics, generated explainers): use HyperFrames directly.
 ---
 # vedit
 
 vedit is a CLI. It does the mechanics (transcribe, cut, build, render) and prints short reports. You make the
 creative calls by writing small files. vedit never judges the look: you and the user do.
 
-Use it when a recording (any video) must become an edited video, or the user wants graphics,
-subtitles or a new graphics style. Not for one-off ffmpeg tasks or videos without a talking head.
+Check the fit first. vedit needs recorded speech: cuts come from the transcript, graphics are anchored to
+spoken words and framing follows the speaker's face.
+
+- Use it when a recording of someone speaking (talk, tutorial, podcast, vlog; any video file) must become an
+  edited video or short-form clips, or the user wants graphics, subtitles or a new graphics style.
+- Do not use it for a video with no recorded speech (ad, launch film, music video, motion graphic, generated
+  or faceless explainer, montage): build that in HyperFrames directly and say why vedit was skipped.
+- Do not use it for a single ffmpeg job (trim, convert, compress).
 
 ## Workflow
 

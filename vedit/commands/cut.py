@@ -111,10 +111,67 @@ def _listen_hook(paths, cuts, words, log, progress):
     return importlib.import_module("vedit.cut.refine").run
 
 
+def _dry_run(ns, project: Project, paths: Paths, r: Report) -> Report:
+    """What `vedit cut` would listen to, write and render, writing nothing (no job is started)."""
+    if not paths.cuts.is_file():
+        raise VeditError(f"no cuts file at {paths.cuts}", next="write cuts.yaml (vedit guide cuts)")
+    r.step(f"{project.slug}  ({paths.root})  dry run: nothing written")
+    wavs = _wavs(project, paths)
+    cf = cutsfile.load(paths.cuts)
+    words = {n: load_words(paths, n) for n in wavs}
+    durations = {n: sf.info(str(w)).duration for n, w in wavs.items()}
+    cuts, problems = cutsfile.resolve(cf, words, durations)
+    if problems:
+        lines = _problem_lines(problems)
+        raise VeditError(f"{len(lines)} cut(s) did not resolve:\n  " + "\n  ".join(lines), next=FIXES)
+    refined: dict = {}
+    to_listen = 0
+    if importlib.util.find_spec("vedit.cut.refine"):
+        from vedit.cut import refine
+
+        refined = refine.cached(paths, cuts, words)
+        if not ns.no_listen:
+            to_listen = sum(1 for c in cuts if c.kind in ("phrase", "filler") and c.pin is None) - len(
+                refined
+            )
+    envs = {}
+    for n, w in wavs.items():  # the cached envelope when valid, else computed in memory (not saved)
+        npy, key = paths.edl / f"envelope-{n}.npy", paths.edl / f"envelope-{n}.key"
+        ok = npy.is_file() and key.is_file() and key.read_text() == (sample_hash(w) or "")
+        envs[n] = np.load(npy) if ok else signal.envelope(w)
+    zoom = {n for n, s in project.sources.items() if s.punch_in}
+    data, info = edl.build(cuts, refined, envs, words, durations, cf.pauses, edl.chapter_holds(cf.chapters),
+                           cf.end, zoom)  # fmt: skip
+    approx = f" (approximate: {to_listen} boundaries still to listen to)" if to_listen else ""
+    r.ok_(f"program {mmss(data['total'])}, {info['pieces']} pieces, {len(cuts)} cuts{approx}")
+    r.info(
+        f"listen: {to_listen} cut(s) through Studio, {len(refined)} cached"
+        if not ns.no_listen
+        else "listen: off"
+    )
+    writes = [str(paths.edl / "cuts.json"), str(paths.edl / "edl.json")]
+    renders = {}
+    if not ns.edl_only:
+        for profile in ("proxy", "master") if ns.master else ("proxy",):
+            items = program.plan(data, paths, profile)
+            files = {d for _, _, d in items}
+            missing = sum(1 for d in files if not d.is_file())
+            renders[profile] = {"pieces": len(files), "to_render": missing, "reused": len(files) - missing}
+            r.info(f"render {profile}: {missing} piece(s) to render, {len(files) - missing} reused")
+            writes.append(str(paths.program / program.PROFILES[profile]["out"]))
+    r.data = {"dry_run": True, "total": data["total"], "pieces": info["pieces"], "cuts": len(cuts),
+              "to_listen": to_listen, "listen_cached": len(refined), "renders": renders, "writes": writes,
+              "model_calls": {"studio_listen_cuts": to_listen}}  # fmt: skip
+    r.next = "vedit cut  (without --dry-run)"
+    return r
+
+
 def run(ns) -> Report:
     root, project = _find(ns)
     paths = project.paths
     r = Report("cut")
+    if ns.dry_run:  # writes nothing, so it is safe while a render runs
+        return _dry_run(ns, project, paths, r)
     if not os.environ.get("VEDIT_JOB"):
         state.refuse_while_rendering(paths, "cut")
     job = state.load(paths)["job"]

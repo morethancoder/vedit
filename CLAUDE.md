@@ -20,6 +20,9 @@ Read `README.md`, then `plans/plan.md` and `plans/principles.md` before touching
   or special-case a particular recorder app in the repo. Recorder support goes in importer plugins in the
   user's config (`~/.config/vedit/importers/`). Personal defaults (styles, logos, languages, paths, brands) live in
   `config.yaml` / channels, never as code defaults or base-pack assets; help examples stay neutral.
+- **No blur by default** (2026-11-07). When footage doesn't fill the canvas (mixed shapes, pillarbox, letterbox) the
+  default fill is a plain background. Blur is an option the user picks, never automatic; a shader background is
+  another option. Applies to every new fill or background vedit adds.
 - **The GitHub repo (github.com/morethancoder/vedit) is public and never gets personal data** (the creator, 2026-11-07).
   Publish only with `make publish MSG="what changed"`: it exports HEAD scrubbed, runs the tests on the export,
   checks tree, message and author (`scripts/public_check.py`) and pushes from `.public/` with the noreply author.

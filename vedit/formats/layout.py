@@ -7,8 +7,11 @@ The program fills the canvas height and pans along the reframe path (source px x
   while the graphic shows and the band reaches down to the bottom of the safe box.
 - a big word behind the head spans the crop, centred on the head, its lower quarter tucked behind the head top
   (the person cut-out stays in front); it lives inside the camera, in source px.
-- full-frame scenes (chapter, doodle, screen, plug, custom) stay 1920x1080 compositions shown as a full-width
-  card, centred in the safe box, over the blurred camera.
+- full-frame scenes (chapter, screen, plug, custom) stay 1920x1080 compositions shown as a full-width card,
+  centred in the safe box, on a plain background (blur only when the output asks for `fill: blur`).
+- a doodle splits the frame: its drawing, in pages of beats whose labels stay readable (vedit.doodles.spec.pages),
+  fills a panel in the top half on a plain background; the captions move up to the seam under it; the camera
+  zooms out about the face and slides down so the whole head sits below the captions.
 
 Every number here is in output px unless it says source px.
 """
@@ -62,8 +65,12 @@ class Geometry:
         return self.safe.y1 - self.caption_h
 
     def clear(self, y0: float, y1: float) -> tuple[float, float]:
-        """(x0, x1) free of every platform's UI over the rows [y0, y1]."""
-        return fm.clear_span(self.platforms, self.canvas, y0, y1)
+        """(x0, x1) free of every platform's UI over the rows [y0, y1], symmetric about the frame's centre: the
+        wider inset (usually the right-hand button rail) is mirrored on the other side, so text centres on the
+        frame and not on a box pushed to one side."""
+        x0, x1 = fm.clear_span(self.platforms, self.canvas, y0, y1)
+        inset = max(x0, self.canvas[0] - x1)
+        return inset, self.canvas[0] - inset
 
     def to_out_x(self, t: float, x_src: float) -> float:
         return (x_src - rf.x_at(self.points, t)) * self.s
@@ -125,7 +132,8 @@ def wrap_css(geo: Geometry, typ: str, slot: Slot) -> str:
         return css
     return (f".wrap {{ left: {sx:.0f}px !important; right: auto !important; width: {sw:.0f}px !important; "
             f"max-width: {sw:.0f}px !important; top: auto !important; bottom: {h - slot.bottom:.0f}px !important; "
-            f"justify-content: center !important; }}")  # fmt: skip
+            f"justify-content: center !important; }}\n"
+            f".txt {{ align-items: center !important; text-align: center !important; }}")  # fmt: skip
 
 
 def big(geo: Geometry, track, s: float, e: float, word: str, adv: dict, track_em: float = -0.03) -> dict:
@@ -158,3 +166,61 @@ def card(geo: Geometry) -> dict:
     h = 1080 * k
     y = geo.safe.y + (geo.safe.h - h) / 2
     return {"k": round(k, 5), "x": round(x0, 1), "y": round(y, 1), "w": round(x1 - x0, 1), "h": round(h, 1)}
+
+
+SPLIT = 0.5  # the doodle panel ends at or above this share of the canvas height
+PANEL_MARGIN = 24  # px inside the panel area on each side
+HEAD = 1.5  # head height (hair to chin) in face-box heights
+HEAD_ROOM = 0.7  # face-box centre to the top of the hair, in face-box heights
+
+
+def split_area(geo: Geometry) -> tuple[float, float, float, float]:
+    """(x0, y0, x1, y1) the doodle panel may use in a split: inside the safe box, above the split line, centred,
+    with the bottom chosen for the largest area (a side button column that starts lower narrows the rows below)."""
+    top = geo.safe.y
+    best = None
+    for bottom in range(int(top) + 300, round(geo.canvas[1] * SPLIT) + 1, 10):
+        x0, x1 = geo.clear(top, bottom)
+        w, h = x1 - x0 - 2 * PANEL_MARGIN, bottom - top - 2 * PANEL_MARGIN
+        if best is None or w * h > best[0]:
+            best = (w * h, (x0 + PANEL_MARGIN, top + PANEL_MARGIN, x1 - PANEL_MARGIN, bottom - PANEL_MARGIN))
+    return best[1]
+
+
+def fit(area: tuple[float, float, float, float], box: tuple[float, float, float, float]) -> dict:
+    """`box` (in a 1920x1080 scene) scaled to fit `area`, centred: {k, x, y, w, h, bx, by} in output px."""
+    aw, ah = area[2] - area[0], area[3] - area[1]
+    bw, bh = box[2] - box[0], box[3] - box[1]
+    k = min(aw / bw, ah / bh, 1.25)
+    pw, ph = bw * k, bh * k
+    return {"k": round(k, 5), "x": round(area[0] + (aw - pw) / 2, 1), "y": round(area[1] + (ah - ph) / 2, 1),
+            "w": round(pw, 1), "h": round(ph, 1), "bx": box[0], "by": box[1]}  # fmt: skip
+
+
+def split_camera(geo: Geometry, track, s: float, e: float, area: tuple[float, float, float, float]) -> dict:
+    """The lower half of a split: captions move up to the seam under the panel, and the camera zooms out (about
+    the face, which the crop already centres) and slides down so the whole head sits below the captions.
+    {cap_dy, z, oy, dy, fill_h}: caption shift, zoom, zoom origin y, slide, height of the plain fill on top."""
+    w, h = geo.canvas
+    seam = area[3] + PANEL_MARGIN
+    cap_dy = round(seam - geo.caption_top, 1) if geo.captions else 0.0
+    below = seam + (geo.caption_h + 16 if geo.captions else 16)
+    boxes, _ = track.over(s, e)
+    if boxes:
+        cys = sorted((b[1] + b[3] / 2) * geo.s for b in boxes)
+        fhs = sorted(b[3] * geo.s for b in boxes)
+        oy, fh = cys[len(cys) // 2], fhs[len(fhs) // 2]
+    else:
+        oy, fh = h * 0.3, h * 0.3
+    room = (h - 120) - below
+    z = min(1.0, 0.8 * room / (HEAD * fh))
+    target = below + HEAD_ROOM * fh * z
+    z = max(z, (h - target) / (h - oy) + 0.01)  # the zoomed frame must still reach the bottom edge
+    xs = [p["x"] * geo.s for p in geo.points if s - 1 <= p["t"] <= e + 1] or [geo.points[0]["x"] * geo.s]
+    for X in xs:  # and both side edges, wherever the crop pans in this window
+        z = max(z, (w / 2) / (w / 2 + X) + 0.01, (w / 2) / (1920 * geo.s - X - w / 2) + 0.01)
+    z = min(1.0, z)
+    dy = target - oy
+    top = target - oy * z
+    return {"cap_dy": cap_dy, "z": round(z, 4), "oy": round(oy, 1), "dy": round(dy, 1),
+            "fill_h": round(max(seam, top), 1)}  # fmt: skip

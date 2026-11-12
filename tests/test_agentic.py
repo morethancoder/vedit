@@ -84,7 +84,7 @@ def test_help_works_for_every_command(verb, capsys):
 
 def test_dry_run_is_rejected_where_not_supported(tmp_path, capsys):
     root = _proj(tmp_path)
-    assert cli.main(["build", "--dry-run", "--json", "--project", str(root)]) == 2
+    assert cli.main(["transcribe", "--dry-run", "--json", "--project", str(root)]) == 2
     assert json.loads(capsys.readouterr().out)["code"] == "usage"
 
 

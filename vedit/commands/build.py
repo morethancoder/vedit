@@ -37,14 +37,15 @@ def mmss(t: float) -> str:
     return f"{int(t // 60):02d}:{t % 60:05.2f}"
 
 
-def _load(ns):
+def _load(ns, refuse: bool = True):
     try:
         root = find_project(override=ns.project)
         project = Project.load(root)
     except ProjectError as e:
         raise VeditError(str(e), next="vedit new <video>  (or: vedit build --project PATH)") from e
     paths = project.paths
-    state.refuse_while_rendering(paths, "build")
+    if refuse:  # a plan or dry run writes nothing, so it is safe while a render runs
+        state.refuse_while_rendering(paths, "build")
     edl_f = paths.edl / "edl.json"
     if not edl_f.is_file():
         raise VeditError(f"{edl_f} is not built yet", next="vedit cut")
@@ -65,7 +66,8 @@ def checked_pack(name: str, roots: list | None = None) -> packs.Pack:
     return pk
 
 
-def make_plan(project, paths, edl):
+def make_plan(project, paths, edl, save: bool = True):
+    """The layout plan. save=False writes nothing (face and brightness caches are used, not updated)."""
     clips = list(project.sources)
     words = {c: load_words(paths, c) for c in clips}
     roots = packs.pack_roots(project.channel)  # channel packs, then global, then built-in
@@ -82,10 +84,11 @@ def make_plan(project, paths, edl):
     clogos = cuesmod.custom_logos(paths, project.channel)
     logos = {**main.logos(), **clogos}
     chs = cuesmod.chapters(cutsfile.load(paths.cuts), edl, main, logos, style) if paths.cuts.exists() else []
-    track = FaceTrack.load(paths, clips, edl)
+    track = FaceTrack.load(paths, clips, edl, save=save)
     lum = place.Lum(paths.program / "proxy.mp4", paths.vedit / "build" / "lum.json")
     plan = build_plan(cues + chs, edl, track, lum, main.advances(), main.data.get("big"))
-    lum.save()
+    if save:
+        lum.save()
     env = pages.Env(
         paths, project.lang, chan.effective_accent(project)[0], project.plug, project.slug, clogos
     )
@@ -181,11 +184,46 @@ def checks(hf: Path, log: Path) -> tuple[list[str], list[str], dict]:
     return errs, warns, nums
 
 
+def _dry_run(r: Report, paths, plan, pack_for, env, project, ns) -> Report:
+    """Which graphic pages and cut-outs `vedit build` would (re)make, writing nothing."""
+    mf = paths.hf / "manifest.json"
+    try:
+        old = json.loads(mf.read_text()).get("comps", {}) if mf.is_file() else {}
+    except ValueError:
+        old = {}
+    write, keep = [], []
+    for p in plan.items:
+        same = (old.get(p.id) or {}).get("key") == pages.key(p, pack_for(p.cue), env)
+        (keep if same and (paths.hf / "compositions" / f"{p.id}.html").is_file() else write).append(p.id)
+    ids = {p.id for p in plan.items}
+    remove = sorted(k for k in old if k not in ids)
+    ranges = {f"mt-{p.id}": (p.start, p.dur) for p in plan.items if p.cue.type == "big-number"}
+    mattes = cutouts.stale(paths, ranges)
+    outs = [o.id for o in project.outputs if o.aspect != "16:9" and (not ns.output or o.id in ns.output)]
+    r.step(f"{project.slug}  dry run: nothing written")
+    r.ok_(
+        f"{len(plan.items)} graphics: {len(write)} to write, {len(keep)} unchanged, {len(remove)} to remove"
+    )
+    for x in plan.problems():
+        r.warn(x)
+    r.info(f"cut-outs: {len(mattes)} to make through Studio, {len(ranges) - len(mattes)} reused")
+    if outs:
+        r.info(f"outputs rebuilt too: {', '.join(outs)}")
+    r.info("checks: " + ("skipped (--no-check)" if ns.no_check else "hyperframes lint + check"))
+    r.data = {"dry_run": True, "graphics": len(plan.items), "write": write, "unchanged": len(keep),
+              "remove": remove, "cutouts": {"make": mattes, "reused": len(ranges) - len(mattes)},
+              "outputs": outs, "problems": plan.problems(), "model_calls": {"studio_cutouts": len(mattes)}}  # fmt: skip
+    r.next = "vedit build  (without --dry-run)"
+    return r
+
+
 def run(ns) -> Report:
     t0 = time.monotonic()
-    project, paths, edl = _load(ns)
-    plan, main, pack_for, env = make_plan(project, paths, edl)
+    project, paths, edl = _load(ns, refuse=not (ns.plan or ns.dry_run))
+    plan, main, pack_for, env = make_plan(project, paths, edl, save=not (ns.plan or ns.dry_run))
     r = Report("build")
+    if ns.dry_run:
+        return _dry_run(r, paths, plan, pack_for, env, project, ns)
     probs = plan.problems()
     on = sum(1 for z in plan.zooms if z[1] != 1.0)
     data = {"graphics": len(plan.items), "zooms": on, "focus": len(plan.focus), "problems": probs}

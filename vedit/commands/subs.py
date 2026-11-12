@@ -43,16 +43,23 @@ def checker(want: set[str]):
     return check
 
 
+def batches(cues, prompt, vars, cache: Path) -> list[tuple[list, str, Path]]:
+    """[(cues, text asked, cache file)] per batch of BATCH; the file is keyed by everything the model is asked."""
+    out = []
+    for i in range(0, len(cues), BATCH):
+        chunk = cues[i : i + BATCH]
+        text = "\n".join(f"{c['id']}: {c['text']}" for c in chunk) + "\n"
+        out.append((chunk, text, cache / f"{hash_of(prompt.body, prompt.meta, vars, text)}.json"))
+    return out
+
+
 def translate(cues, prompt, vars, model, cache: Path, log: Path, force: bool) -> tuple[dict, dict, dict]:
     """-> (src lines, tr lines, usage) by cue id; each batch of 40 is cached by the hash of what it was asked."""
     src, tr = {}, {}
     use = {"batches": 0, "cached": 0, "models": [], "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0,
            "seconds": 0.0, "fallbacks": [], "retries": []}  # fmt: skip
     cache.mkdir(parents=True, exist_ok=True)
-    for i in range(0, len(cues), BATCH):
-        chunk = cues[i : i + BATCH]
-        text = "\n".join(f"{c['id']}: {c['text']}" for c in chunk) + "\n"
-        f = cache / f"{hash_of(prompt.body, prompt.meta, vars, text)}.json"
+    for chunk, text, f in batches(cues, prompt, vars, cache):
         use["batches"] += 1
         if not force and f.is_file():
             value = json.loads(f.read_text(encoding="utf-8"))
@@ -95,6 +102,20 @@ def run(ns) -> Report:
     r.step(f"{project.slug}  ({root})")
     prompt = llm.load_prompt("subs")
     vars = {"context": llm.context(project), "src_lang": LANGS[lang], "tr_lang": LANGS[other]}
+    if ns.dry_run:
+        bs = batches(cues, prompt, vars, paths.vedit / "subs")
+        todo, n = [f for _c, _t, f in bs if ns.force or not f.is_file()], len(bs)
+        r.ok_(
+            f"{len(cues)} cues in {n} batches of {BATCH}: {len(todo)} to ask the model, {n - len(todo)} cached"
+        )
+        r.info(
+            f"model: {ns.model}{' (the router picks)' if ns.model == 'auto' else ''}; dry run: nothing written"
+        )
+        r.info(f"would write: {', '.join(str(root / 'subs' / x) for x in ('ar.srt', 'en.srt', 'en.txt'))}")
+        r.data = {"dry_run": True, "cues": len(cues), "batches": n, "to_ask": len(todo), "cached": n - len(todo),
+                  "model_calls": {"llm_batches": len(todo)}}  # fmt: skip
+        r.next = "vedit subs  (without --dry-run)"
+        return r
     src, tr, use = translate(
         cues, prompt, vars, ns.model, paths.vedit / "subs", paths.logs / "llm.jsonl", ns.force
     )

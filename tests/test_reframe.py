@@ -62,3 +62,17 @@ def test_crop_stays_inside_the_frame_and_handles_no_face():
 
 def test_16x9_needs_no_crop():
     assert {p["x"] for p in rf.path(Track(lambda t: 300), edl(), 0, 5, "16:9")} == {0.0}
+
+
+def test_recentres_fully_after_the_speaker_moves():
+    """A step move: the crop doesn't stop at the dead-zone edge, it settles with the face in the middle."""
+    pts = rf.path(Track(lambda t: 900 if t < 5 else 1020), edl(), 0, 20, "9:16")
+    assert abs(rf.x_at(pts, 2) + 607.5 / 2 - 900) < 8
+    assert abs(rf.x_at(pts, 18) + 607.5 / 2 - 1020) < 0.03 * 607.5
+
+
+def test_a_piece_starts_centred_on_its_median_face_not_its_first_sample():
+    pts = rf.path(Track(lambda t: 600 if t < 0.3 else 1000), edl(), 0, 20, "9:16")
+    assert (
+        abs(rf.x_at(pts, 1.0) + 607.5 / 2 - 1000) < 8
+    )  # (at t=0 the crop still keeps the real face in frame)

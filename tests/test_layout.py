@@ -47,12 +47,16 @@ def test_card_is_full_width_unless_side_ui_reaches_its_rows():
     assert c["w"] == 1080 and c["h"] == 607.5 and abs(c["y"] + c["h"] / 2 - (g.safe.y + g.safe.h / 2)) < 0.1
     g = geo()  # tiktok's action column (x >= 780 below y 840) reaches into the card's rows
     c = lay.card(g)
-    assert c["x"] == 0 and c["x"] + c["w"] <= 780 + 0.5
+    assert (
+        c["x"] + c["w"] <= 780 + 0.5 and abs(c["x"] - (1080 - c["x"] - c["w"])) < 0.6
+    )  # centred on the frame
 
 
-def test_clear_span_narrows_for_action_columns():
+def test_clear_span_narrows_for_action_columns_and_stays_centred():
     g = geo()
-    assert g.clear(300, 500) == (120, 853) and g.clear(900, 1100)[1] <= 780
+    assert g.clear(300, 500) == (227, 853)  # the right inset (227) mirrored on the left: centred on the frame
+    x0, x1 = g.clear(900, 1100)
+    assert x1 <= 780 and x0 + x1 == 1080
 
 
 def test_big_word_spans_the_crop_and_tucks_behind_the_head():
@@ -66,3 +70,36 @@ def test_wrap_css_targets_the_band():
     g = geo()
     css = lay.wrap_css(g, "label", lay.Slot(700, 1100, False))
     assert "left: 120px" in css and "bottom: 820px" in css and "width: 733px" in css
+
+
+def test_label_text_centres_in_the_band():
+    css = lay.wrap_css(geo(), "label", lay.Slot(700, 1100, False))
+    assert ".txt { align-items: center !important; text-align: center !important; }" in css
+
+
+def test_split_area_is_centred_and_stays_above_the_side_buttons():
+    g = geo(platforms=("instagram-reels", "tiktok"))
+    x0, y0, x1, y1 = lay.split_area(g)
+    assert abs(x0 - (1080 - x1)) < 0.6 and y0 >= g.safe.y and y1 <= 1920 * lay.SPLIT
+    assert (
+        y1 + lay.PANEL_MARGIN <= 840 + 0.5
+    )  # tiktok's action column starts at y 840: the panel stops above it
+
+
+def test_fit_centres_the_drawing_in_the_area():
+    c = lay.fit((100, 300, 900, 800), (0, 0, 1600, 500))
+    assert c["k"] == 0.5 and c["w"] == 800 and c["x"] == 100 and c["y"] == 300 + (500 - 250) / 2
+
+
+def test_split_camera_puts_the_whole_head_under_the_seam_captions():
+    g = geo()
+    area = lay.split_area(g)
+    c = lay.split_camera(g, Track(bottom=500), 0, 5, area)
+    seam = area[3] + lay.PANEL_MARGIN
+    assert c["cap_dy"] == round(seam - g.caption_top, 1)  # captions move up to the seam
+    fh = 300 * g.s
+    face_mid = c["oy"] + c["dy"]  # the zoom pivots on the face centre, then slides by dy
+    head_top = face_mid - lay.HEAD_ROOM * fh * c["z"]
+    assert head_top >= seam + g.caption_h + 16 - 0.5 and c["z"] < 1
+    assert c["oy"] + (1920 - c["oy"]) * c["z"] + c["dy"] >= 1920  # the zoomed camera still reaches the bottom
+    assert c["fill_h"] >= seam

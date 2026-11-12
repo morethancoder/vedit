@@ -65,6 +65,20 @@ def key_of(start: float, dur: float, cut: str, variant: str, how: str = METHOD) 
     return hash_of(f"{round(start, 3):.3f}", f"{round(dur, 3):.3f}", cut, variant, how)
 
 
+def stale(paths: Paths, ranges: dict[str, tuple[float, float]], variant: str = "proxy") -> list[str]:
+    """The cut-outs `ensure` would (re)build, without building or writing anything."""
+    _src, sub = VARIANTS[variant]
+    out_dir = paths.mattes / sub if sub else paths.mattes
+    cut, how = cut_hash(paths), method()
+    todo = []
+    for name, (start, dur) in ranges.items():
+        out, keyf = out_dir / f"{name}.webm", out_dir / f"{name}.key"
+        ok = out.exists() and out.stat().st_size > 0 and keyf.exists()
+        if not (ok and keyf.read_text().strip() == key_of(start, dur, cut, variant, how)):
+            todo.append(name)
+    return todo
+
+
 def ensure(
     project,
     paths: Paths,

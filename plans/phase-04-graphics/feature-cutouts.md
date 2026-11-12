@@ -10,4 +10,4 @@ Done when:
 ## Refs
 
 - port T `scripts/matte.sh`, `tools/matte_mask.py`, `build.py` `big_layout`
-- `../phase-06-studio/feature-video-cutout.md`
+- `../phase-06-studio/step.md` (planned in Studio `plans/phase-20-vedit/feature-video-cutout.md`)

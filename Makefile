@@ -22,7 +22,7 @@ fmt: ## format with ruff
 install: ## install vedit on PATH (editable)
 	@uv tool install -e . --force
 
-clean: ## remove caches and build output, print what was freed
+clean: ## remove test and build leftovers (repo caches, pytest temp, vedit caches in your projects)
 	@bash scripts/clean.sh
 
 public: ## export a scrubbed, checked tree to OUT (default .public-stage) without publishing

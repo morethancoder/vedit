@@ -393,3 +393,126 @@ def draw(spec: dict, seed: int, dur: float, beats: dict[str, float], style: Styl
                 k = named[sp["of"]] if sp.get("of") else s.cur["k"]
                 s.spin(k, sp["about"][0], sp["about"][1], sp["rate"], t + float(sp.get("after", 0)))
     return s
+
+
+def content_box(spec: dict, pad: float = 36.0) -> tuple[float, float, float, float]:
+    """(x0, y0, x1, y1) of what a full-form scene draws, in its 1920x1080 frame: shapes by their half-size,
+    texts by an estimate of their width (about 0.55 em per character), plus `pad`. Lets a vertical output crop
+    the empty margins and show the drawing larger."""
+    xs: list[float] = []
+    ys: list[float] = []
+
+    def add(x: float, y: float, hx: float, hy: float) -> None:
+        xs.extend((x - hx, x + hx))
+        ys.extend((y - hy, y + hy))
+
+    for items in (spec.get("beats") or {}).values():
+        for it in items:
+            if "text" in it and _pt(it.get("at")):
+                x, y = it["at"]
+                size = float(it.get("size", 54))
+                tw = 0.55 * size * len(str(it["text"]))
+                anchor = it.get("anchor", "middle")
+                x0 = x - tw if anchor == "end" else x if anchor == "start" else x - tw / 2
+                xs.extend((x0, x0 + tw))
+                ys.extend((y - size * 0.8, y + size * 0.4))
+            for sh in it.get("shapes") or []:
+                for kind, p in sh.items():
+                    if not isinstance(p, dict):
+                        continue
+                    for key in ("a", "b"):
+                        if _pt(p.get(key)):
+                            add(*p[key], 10.0, 10.0)
+                    if _pt(p.get("at")):
+                        hx, hy = _half(kind, p)
+                        if "r1" in p:
+                            hx = hy = float(p["r1"])
+                        add(*p["at"], hx, hy)
+    if not xs:
+        return 0.0, 0.0, 1920.0, 1080.0
+    return (
+        max(0.0, min(xs) - pad),
+        max(0.0, min(ys) - pad),
+        min(1920.0, max(xs) + pad),
+        min(1080.0, max(ys) + pad),
+    )
+
+
+def _shift(items: list, dx: float, dy: float) -> list:
+    out = []
+    for it in items:
+        it = dict(it)
+        if _pt(it.get("at")):
+            it["at"] = [it["at"][0] + dx, it["at"][1] + dy]
+        if it.get("shapes"):
+            shapes = []
+            for sh in it["shapes"]:
+                sh2 = {}
+                for kind, p in sh.items():
+                    if isinstance(p, dict):
+                        p = dict(p)
+                        for key in ("at", "a", "b"):
+                            if _pt(p.get(key)):
+                                p[key] = [p[key][0] + dx, p[key][1] + dy]
+                    sh2[kind] = p
+                shapes.append(sh2)
+            it["shapes"] = shapes
+        out.append(it)
+    return out
+
+
+def _scale_text(items: list, f: float) -> list:
+    return [{**it, "size": round(float(it.get("size", 54)) * f, 1)} if "text" in it else it for it in items]
+
+
+def _min_label(beats: dict) -> float:
+    sizes = [float(it.get("size", 54)) for items in beats.values() for it in items if "text" in it]
+    return min(sizes) if sizes else 0.0
+
+
+def _row(beats: dict, names: list[str], gap: float) -> dict:
+    """`names` side by side in their original left-to-right order, `gap` apart, centred in the 1920x1080 frame."""
+    boxes = {n: content_box({"beats": {n: beats[n]}}, pad=0) for n in names}
+    width = sum(b[2] - b[0] for b in boxes.values()) + gap * (len(names) - 1)
+    x = 960 - width / 2
+    out = {}
+    for n in sorted(names, key=lambda n: boxes[n][0]):
+        b = boxes[n]
+        out[n] = _shift(beats[n], x - b[0], 540 - (b[1] + b[3]) / 2)
+        x += b[2] - b[0] + gap
+    return {n: out[n] for n in names}
+
+
+def pages(spec: dict, area_w: float, area_h: float, min_px: float = 38.0, gap: float = 60.0) -> list[dict]:
+    """A scene split into pages for a small panel (a vertical split): consecutive beats share a page while its
+    labels, scaled to fit `area_w` x `area_h`, stay at least `min_px` tall; each page is one row in the beats'
+    original left-to-right order. A beat too small even alone gets its labels grown (up to 1.6x). Each page is a
+    full-form scene with the original's other keys; one page (the scene itself) when everything fits."""
+    beats = spec.get("beats") or {}
+    rest = {k: v for k, v in spec.items() if k != "beats"}
+
+    def label_px(bs: dict) -> float:
+        b = content_box({"beats": bs}, pad=24)
+        return _min_label(bs) * min(area_w / (b[2] - b[0]), area_h / (b[3] - b[1]))
+
+    whole = label_px(beats)
+    if whole >= min_px or len(beats) < 2:
+        groups = [list(beats)]
+    else:
+        groups, cur = [], []
+        for n in beats:
+            if cur and label_px(_row(beats, [*cur, n], gap)) < min_px:
+                groups.append(cur)
+                cur = []
+            cur.append(n)
+        groups.append(cur)
+    out = []
+    for g in groups:
+        bs = {n: beats[n] for n in g} if len(groups) == 1 else _row(beats, g, gap)
+        px = label_px(bs)
+        if 0 < px < min_px:
+            bs = {n: _scale_text(items, min(1.6, min_px / px * 1.05)) for n, items in bs.items()}
+            if len(bs) > 1 or len(groups) > 1:
+                bs = _row(bs, list(bs), gap)
+        out.append({**rest, "beats": bs})
+    return out

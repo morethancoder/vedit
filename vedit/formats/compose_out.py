@@ -79,10 +79,22 @@ def _host(g: Graphic, a: float, size: tuple[int, int], style: str = "") -> str:
 
 
 def index_html(
-    geo: lay.Geometry, plan, graphics, cards: dict, sfx, pk, edl, lang: str, captions_html: str = ""
+    geo: lay.Geometry,
+    plan,
+    graphics,
+    cards: dict,
+    sfx,
+    pk,
+    edl,
+    lang: str,
+    captions_html: str = "",
+    fill: str = "plain",
+    splits: list | None = None,
 ) -> str:
     a, b = geo.t0, geo.t1
     w, h = geo.canvas
+    bg = pk.data.get("background", "#121110")
+    splits = splits or []
     behind = "\n".join(compose.host(g, a) for g in graphics if g.layer == "behind")
     mattes = "\n".join(
         f'          <video id="{g.matte}" src="media/{g.matte}.webm" muted playsinline data-start="{g.start - a:.3f}" '
@@ -94,7 +106,14 @@ def index_html(
     for g in graphics:
         if g.layer != "front":
             continue
-        if g.id in cards:
+        if g.id in cards and cards[g.id].get("mode") == "split":
+            c = cards[g.id]
+            inner = (f"position:absolute;left:{-c['bx'] * c['k']:.1f}px;top:{-c['by'] * c['k']:.1f}px;"
+                     f"width:1920px;height:1080px;transform:scale({c['k']});transform-origin:0 0")  # fmt: skip
+            front.append(f'      <div class="panel" style="position:absolute;left:{c["x"]}px;top:{c["y"]}px;'
+                         f'width:{c["w"]}px;height:{c["h"]}px;overflow:hidden">\n'
+                         f"  {_host(g, a, (1920, 1080), inner)}\n      </div>")  # fmt: skip
+        elif g.id in cards:
             c = cards[g.id]
             style = (f"position:absolute;left:{c['x']}px;top:{c['y']}px;width:1920px;height:1080px;"
                      f"transform:scale({c['k']});transform-origin:0 0")  # fmt: skip
@@ -118,14 +137,44 @@ def index_html(
         if a < t < b
     ]
     fo = {"blur": 20, "brightness": 0.42, "in": 0.3, "out": 0.35, **(pk.data.get("focus") or {})}
-    on = f'filter: "blur({fo["blur"]}px) brightness({fo["brightness"]})"'
-    fl = [
-        f'      tl.to("#cam", {{ {on}, duration: {fo["in"]}, ease: "power2.out" }}, {max(0.0, s0 - a):.3f});\n'
-        f'      tl.to("#cam", {{ filter: "blur(0px) brightness(1)", duration: {fo["out"]}, ease: "power2.in" }}, '
-        f"{min(e0, b) - a - fo['out']:.3f});"
-        for s0, e0 in plan.focus
-        if s0 < b and e0 > a
-    ]
+    if fill == "blur":
+        on = f'filter: "blur({fo["blur"]}px) brightness({fo["brightness"]})"'
+        fl = [
+            f'      tl.to("#cam", {{ {on}, duration: {fo["in"]}, ease: "power2.out" }}, {max(0.0, s0 - a):.3f});\n'
+            f'      tl.to("#cam", {{ filter: "blur(0px) brightness(1)", duration: {fo["out"]}, ease: "power2.in" }}, '
+            f"{min(e0, b) - a - fo['out']:.3f});"
+            for s0, e0 in plan.focus
+            if s0 < b and e0 > a
+        ]
+    else:  # plain: a solid background comes up behind a full-frame scene
+        fl = []
+
+        def tween(el: str, on: dict, off: dict, t_in: float, t_out: float) -> None:
+            def js(d):
+                return ", ".join(f"{k}: {v}" for k, v in d.items())
+
+            fl.append(
+                f'      tl.to("{el}", {{ {js(on)}, duration: {fo["in"]}, ease: "power2.out" }}, {t_in:.3f});'
+            )
+            fl.append(
+                f'      tl.to("{el}", {{ {js(off)}, duration: {fo["out"]}, ease: "power2.in" }}, {t_out:.3f});'
+            )
+
+        for g in graphics:
+            if cards.get(g.id, {}).get("mode") == "card":
+                t_in, t_out = max(0.0, g.start - a), max(0.0, min(g.start + g.dur, b) - a - fo["out"])
+                tween("#fill-full", {"opacity": 1}, {"opacity": 0}, t_in, t_out)
+        # a split doodle: plain fill on top, captions up to the seam, the camera zoomed out and slid down
+        for sp in splits:
+            t_in, t_out = max(0.0, sp["t0"] - a), max(0.0, min(sp["t1"], b) - a - fo["out"])
+            fl.append(f'      tl.set("#fill-top", {{ height: {sp["fill_h"]} }}, {t_in:.3f});')
+            fl.append(
+                f'      tl.set("#zoom", {{ transformOrigin: "{w / 2:.0f}px {sp["oy"]:.0f}px" }}, {t_in:.3f});'
+            )
+            tween("#fill-top", {"opacity": 1}, {"opacity": 0}, t_in, t_out)
+            tween("#zoom", {"scale": sp["z"], "y": sp["dy"]}, {"scale": 1, "y": 0}, t_in, t_out)
+            if sp["cap_dy"] and captions_html:
+                tween("#captions", {"y": sp["cap_dy"]}, {"y": 0}, t_in, t_out)
     fade = ""
     if edl.fade_start is not None and a <= edl.fade_start < b:
         fd = max(0.1, round(b - edl.fade_start, 3))
@@ -148,10 +197,15 @@ def index_html(
       #cam {{ position: absolute; inset: 0; overflow: hidden; }}
       #cam video {{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }}
       #fade {{ position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }}
+      #fill-top, #fill-full {{ position: absolute; left: 0; top: 0; width: {w}px; background: {bg}; opacity: 0; pointer-events: none; }}
+      #fill-top {{ height: {round(h / 2)}px; }}
+      #zoom {{ position: absolute; inset: 0; }}
+      #fill-full {{ height: {h}px; }}
     </style>
   </head>
   <body>
     <div id="root" data-composition-id="main" data-start="0" data-duration="{frame_safe(dur)}" data-width="{w}" data-height="{h}">
+      <div id="zoom">
       <div id="frame">
         <div id="cam">
           <video id="program" src="media/program.mp4" playsinline data-has-audio="true" data-start="0" data-media-start="{a:.4f}" data-duration="{frame_safe(dur)}" data-track-index="0"></video>
@@ -161,6 +215,9 @@ def index_html(
 {mattes}
         </div>
       </div>
+      </div>
+      <div id="fill-full"></div>
+      <div id="fill-top"></div>
       <!-- layer: front -->
 {chr(10).join(front)}
 {captions_html}
@@ -175,7 +232,7 @@ def index_html(
 {chr(10).join(_pan_lines(geo, a))}
       // punch-ins on camera jump cuts
 {chr(10).join(zl)}
-      // full-frame scenes: the A-roll blurs and dims behind them
+      // full-frame scenes: a plain background behind them (fill: blur blurs and dims the A-roll instead)
       tl.set("#cam", {{ filter: "blur(0px) brightness(1)" }}, 0);
 {chr(10).join(fl)}
 {fade}
@@ -184,6 +241,47 @@ def index_html(
   </body>
 </html>
 """
+
+
+def _split_doodles(items, geo: lay.Geometry, track, out, env: pages.Env):
+    """In a vertical output (fill: plain), each doodle becomes a split: its drawing in pages over the top panel
+    (vedit.doodles.spec.pages: one page per group of beats whose labels stay readable), the speaker below.
+    Returns (plan items with doodles replaced by their pages, page id -> panel placement, split windows)."""
+    if out.fill == "blur" or not out.vertical:
+        return list(items), {}, []
+    from vedit.doodles import library as dlib
+    from vedit.doodles import spec as dspec
+
+    area = lay.split_area(geo)
+    aw, ah = area[2] - area[0], area[3] - area[1]
+    res, page_of, splits = [], {}, []
+    for p in items:
+        if p.cue.type != "doodle" or not _in_span(p, geo.t0, geo.t1):
+            res.append(p)
+            continue
+        sp, seed = dlib.resolve(p.cue.fields["scene"], lang=env.lang)
+        pgs = dspec.pages(sp, aw, ah)
+        names = list(sp.get("beats") or {})
+        known = p.cue.beats
+        starts = [p.start]
+        for k, pg in enumerate(pgs[1:], 1):
+            first = next(iter(pg["beats"]))
+            t = known.get(first, p.start + p.dur * names.index(first) / max(1, len(names)))
+            starts.append(min(max(t - 0.15, starts[-1] + 0.8), p.end - 0.8))
+        ends = [*starts[1:], p.end]
+        for k, (pg, s0, e0) in enumerate(zip(pgs, starts, ends, strict=True)):
+            cue = p.cue
+            if len(pgs) > 1:
+                fields = {**cue.fields, "scene": {**pg, "seed": seed}}
+                beats = {n: t for n, t in cue.beats.items() if n in pg["beats"]}
+                cue = dataclasses.replace(cue, id=f"{cue.id}-p{k + 1}", fields=fields, beats=beats)
+            elif pg is not sp:
+                cue = dataclasses.replace(cue, fields={**cue.fields, "scene": {**pg, "seed": seed}})
+            q = dataclasses.replace(p, cue=cue, start=s0, dur=e0 - s0)
+            page_of[q.id] = {**lay.fit(area, dspec.content_box(pg)), "page": k}
+            res.append(q)
+        splits.append({"t0": p.start, "t1": p.end, **lay.split_camera(geo, track, p.start, p.end, area)})
+    return res, page_of, splits
 
 
 def write(paths, out, geo: lay.Geometry, plan, packs_for, main_pack, edl, env: pages.Env, track, mattes, words=None) -> OutResult:  # fmt: skip
@@ -200,7 +298,8 @@ def write(paths, out, geo: lay.Geometry, plan, packs_for, main_pack, edl, env: p
     adv = main_pack.advances()
     new, written, reused, graphics, cards, pauses, slots = {}, [], [], [], {}, [], {}
     media: dict[str, Path] = {"media/program.mp4": Path(paths.program) / "proxy.mp4"}
-    for p in plan.items:
+    items, page_of, splits = _split_doodles(plan.items, geo, track, out, env)
+    for p in items:
         if not _in_span(p, geo.t0, geo.t1):
             continue
         typ = p.cue.type
@@ -216,8 +315,12 @@ def write(paths, out, geo: lay.Geometry, plan, packs_for, main_pack, edl, env: p
             slots[p.id] = {"x": slot.x0, "y": slot.top, "w": slot.x1 - slot.x0, "h": slot.bottom - slot.top}
         elif typ == "big-number":
             q = dataclasses.replace(p, big=lay.big(geo, track, p.start, end, str(p.cue.fields["word"]), adv))
+        elif p.id in page_of:
+            cards[p.id] = {**page_of[p.id], "mode": "split"}
+            c = cards[p.id]
+            slots[p.id] = {"x": c["x"], "y": c["y"], "w": c["w"], "h": c["h"]}
         elif typ in lay.CARD:
-            cards[p.id] = lay.card(geo)
+            cards[p.id] = {**lay.card(geo), "mode": "card"}
             c = cards[p.id]
             slots[p.id] = {"x": c["x"], "y": c["y"], "w": c["w"], "h": c["h"]}
         k = pages.key(q, pk, env, size, css)
@@ -231,6 +334,8 @@ def write(paths, out, geo: lay.Geometry, plan, packs_for, main_pack, edl, env: p
             write_if_changed(f, pg.html)
             written.append(p.id)
             sounds, med = pg.sounds, pg.media
+            if page_of.get(p.id, {}).get("page", 0) > 0:
+                sounds = [x for x in sounds if x[0] != "focus"]
         new[p.id] = {
             "key": k,
             "sounds": [list(s) for s in sounds],
@@ -249,7 +354,7 @@ def write(paths, out, geo: lay.Geometry, plan, packs_for, main_pack, edl, env: p
         if f.stem not in new and not (burn and f.stem == "captions"):
             f.unlink()
     sfx = place_sfx(graphics, main_pack)
-    packs_used = list({id(pk): pk for pk in [main_pack, *(packs_for(p.cue) for p in plan.items)]}.values())
+    packs_used = list({id(pk): pk for pk in [main_pack, *(packs_for(p.cue) for p in items)]}.values())
     compose.assets(hf, packs_used, env, {r[2] for r in sfx})
     if any(g.type == "custom" for g in graphics):
         compose.link(Path(paths.custom), hf / "custom")
@@ -271,7 +376,8 @@ def write(paths, out, geo: lay.Geometry, plan, packs_for, main_pack, edl, env: p
         cx0, cx1 = geo.clear(geo.caption_top, geo.safe.y1)
         slots["captions"] = {"x": cx0, "y": geo.caption_top, "w": cx1 - cx0, "h": geo.caption_h}
     write_if_changed(
-        hf / "index.html", index_html(geo, plan, graphics, cards, sfx, main_pack, edl, env.lang, cap_html)
+        hf / "index.html",
+        index_html(geo, plan, graphics, cards, sfx, main_pack, edl, env.lang, cap_html, out.fill, splits),
     )
     write_if_changed(mf, json.dumps({"comps": new, "output": out.as_dict(), "span": [geo.t0, geo.t1],
                                      "pauses": pauses, "slots": slots, "cards": sorted(cards)},

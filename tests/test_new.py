@@ -96,6 +96,35 @@ def test_rerun_redoes_only_missing_and_keeps_project_yaml(tmp_path, capsys):
     assert Project.load(root).lang == "en"
 
 
+def test_copied_camera_project_keeps_its_media(tmp_path, fake_importer, monkeypatch):
+    rec = make_rec(tmp_path)
+    assert new(rec, "--dir", tmp_path / "out", "--slug", "t", "--lang", "ar") == 0
+    shutil.copytree(tmp_path / "out" / "t", tmp_path / "copy" / "t", symlinks=True)
+    m = tmp_path / "copy" / "t" / ".vedit/media"
+    stamps = {x: (m / x).stat().st_mtime_ns for x in ("A-cam.mp4", "proxy/A.mp4", "A-48k.wav")}
+    no_ffmpeg(monkeypatch)
+    assert new(rec, "--dir", tmp_path / "copy", "--slug", "t", "--lang", "ar") == 0  # nothing rebuilt
+    assert stamps == {x: (m / x).stat().st_mtime_ns for x in stamps}
+
+
+def test_old_proxy_hash_is_upgraded_in_place(tmp_path, monkeypatch):
+    f = tmp_path / "talk.mp4"
+    shutil.copy(CLIP, f)
+    assert new(f, "--dir", tmp_path / "out", "--lang", "ar") == 0
+    m = tmp_path / "out" / "talk" / ".vedit/media"
+    man = json.loads((m / "manifest.json").read_text())
+    real = f.resolve()
+    src = media.hash_of([str(real), real.stat().st_size])
+    man["proxy/A.mp4"] = media.hash_of(
+        media.PARAMS["proxy"], src, str(real), real.stat().st_size
+    )  # old formula
+    (m / "manifest.json").write_text(json.dumps(man))
+    no_ffmpeg(monkeypatch)
+    assert new(f, "--dir", tmp_path / "out", "--lang", "ar") == 0
+    upgraded = json.loads((m / "manifest.json").read_text())["proxy/A.mp4"]
+    assert upgraded == media.hash_of(media.PARAMS["proxy"], src, "source", real.stat().st_size)
+
+
 def test_importer_folder_builds_clean_camera(tmp_path, fake_importer, capsys):
     rec = make_rec(tmp_path, mirror=True)
     assert new(rec, "--dir", tmp_path / "out", "--slug", "t", "--lang", "ar") == 0

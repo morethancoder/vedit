@@ -73,8 +73,20 @@ class Manifest:
         os.replace(tmp, self.path)
 
 
-def ensure(manifest: Manifest, out: Path, key: str, in_hash: str, make: Callable[[Path], object]) -> bool:
-    """Build `out` via make(tmp) unless it exists with this input hash. True when it was built."""
+def ensure(
+    manifest: Manifest,
+    out: Path,
+    key: str,
+    in_hash: str,
+    make: Callable[[Path], object],
+    legacy: str | None = None,
+) -> bool:
+    """Build `out` via make(tmp) unless it exists with this input hash. True when it was built.
+
+    `legacy` is the same input under an older hash formula: a match is upgraded in place, not rebuilt."""
+    if out.is_file() and legacy and manifest.data.get(key) == legacy:
+        manifest.data[key] = in_hash
+        manifest.save()
     if out.is_file() and manifest.data.get(key) == in_hash:
         return False
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -126,17 +138,31 @@ def make_sheet(src: Path, dst: Path, duration: float, log: Path) -> None:
     run(cmd, 600, log=log)
 
 
-def ingest_media(paths: Paths, plans: list[SourcePlan], log: Path) -> tuple[list[Path], list[str], list[str]]:
-    """Make every missing output. Returns (outputs, names built this run, warnings)."""
+def ingest_media(
+    paths: Paths, plans: list[SourcePlan], log: Path, dry: bool = False
+) -> tuple[list[Path], list[str], list[str]]:
+    """Make every missing output. Returns (outputs, names built this run, warnings).
+
+    dry: build and write nothing; `built` lists what a real run would build."""
     m = paths.media
     man = Manifest(paths)
     outputs: list[Path] = []
     built: list[str] = []
     warns: list[str] = []
 
-    def step(out: Path, in_hash: str, make) -> None:
+    def would_build(out: Path) -> None:
         outputs.append(out)
-        if ensure(man, out, out.relative_to(m).as_posix(), in_hash, make):
+        built.append(out.relative_to(m).as_posix())
+
+    def step(out: Path, in_hash: str, make, legacy: str | None = None) -> None:
+        if dry:
+            if out.is_file() and man.data.get(out.relative_to(m).as_posix()) in (in_hash, legacy):
+                outputs.append(out)
+            else:
+                would_build(out)
+            return
+        outputs.append(out)
+        if ensure(man, out, out.relative_to(m).as_posix(), in_hash, make, legacy):
             built.append(out.relative_to(m).as_posix())
 
     for p in plans:
@@ -152,17 +178,28 @@ def ingest_media(paths: Paths, plans: list[SourcePlan], log: Path) -> tuple[list
                 lambda t, cam=cam, f=f, p=p: make_cam(cam, f, m / f"{p.name}-cam.filter", t, log),
             )
         else:
-            vid = f
+            vid, cam_hash = f, None
         src_hash = hash_of([str(f), _size(f)])
         proxy = m / "proxy" / f"{p.name}.mp4"
-        step(proxy, hash_of(PARAMS["proxy"], src_hash, str(vid), _size(vid)),
-             lambda t, vid=vid: proxy_1080p30(vid, t, log=log))  # fmt: skip
+        sheet = m / "sheet" / f"{p.name}.jpg"
+        # dry run: whatever is made after a rebuilt A-cam (proxy, then sheet) is rebuilt too
+        chain = dry and (vid.relative_to(m).as_posix() in built if vid.is_relative_to(m) else False)
+        if chain or (dry and not vid.is_file()):
+            would_build(proxy)
+        else:
+            # keyed on what the proxy is made from, never on where the project lives (a copied project keeps it)
+            step(proxy, hash_of(PARAMS["proxy"], src_hash, cam_hash or "source", _size(vid)),
+                 lambda t, vid=vid: proxy_1080p30(vid, t, log=log),
+                 legacy=hash_of(PARAMS["proxy"], src_hash, str(vid), _size(vid)))  # fmt: skip
         if has_audio(p.audio):
             step(m / f"{p.name}-48k.wav", hash_of(PARAMS["wav"], src_hash),
                  lambda t, a=p.audio: wav48k(a, t, mono=False, log=log))  # fmt: skip
         else:
             warns.append(f"{p.name}: {p.audio.name} has no audio stream; no WAV made")
+        if dry and f"proxy/{p.name}.mp4" in built:
+            would_build(sheet)
+            continue
         dur = float(ffprobe_json(proxy)["format"]["duration"])
-        step(m / "sheet" / f"{p.name}.jpg", hash_of(PARAMS["sheet"], _size(proxy), round(dur, 1)),
+        step(sheet, hash_of(PARAMS["sheet"], _size(proxy), round(dur, 1)),
              lambda t, proxy=proxy, dur=dur: make_sheet(proxy, t, dur, log))  # fmt: skip
     return outputs, built, warns

@@ -77,7 +77,7 @@ EFFECTS: dict[str, list[str]] = {
 }
 
 # Commands that honour --dry-run (report the plan, write nothing). Others reject it.
-DRY_RUN: set[str] = {"clean", "render", "draft"}
+DRY_RUN: set[str] = {"clean", "render", "draft", "new", "cut", "build", "subs"}
 
 # verb -> guide topic named in its --help ("" = the overview, plain `vedit guide`).
 GUIDE_TOPIC: dict[str, str] = {
@@ -176,8 +176,15 @@ def _module(verb: str):
     return importlib.import_module(name) if name else None
 
 
+DESCRIPTION = (
+    "Agent-first CLI that edits a recording of someone speaking (talk, tutorial, podcast, vlog) into a "
+    "finished video and short-form clips: cut, word-anchored graphics, subtitles, render. "
+    "Not for videos with no recorded speech (ads, music videos, motion graphics). Fit check: vedit guide."
+)
+
+
 def build_parser() -> argparse.ArgumentParser:
-    p = VeditParser(prog="vedit", description="Agent-first video editing CLI.")
+    p = VeditParser(prog="vedit", description=DESCRIPTION)
     p.add_argument("--version", action="version", version=f"vedit {__version__}")
     _globals(p, lambda v: v)
     sub = p.add_subparsers(dest="command", metavar="<command>")

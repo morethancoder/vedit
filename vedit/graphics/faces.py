@@ -111,8 +111,10 @@ def proxy_of(paths: Paths, clip: str) -> Path:
     return paths.media / "proxy" / f"{clip}.mp4"
 
 
-def load_clip(paths: Paths, clip: str, force: bool = False) -> tuple[list[dict], bool, str]:
-    """(rows, cache_hit, key) for one clip; cached at .vedit/faces/<clip>.json."""
+def load_clip(
+    paths: Paths, clip: str, force: bool = False, save: bool = True
+) -> tuple[list[dict], bool, str]:
+    """(rows, cache_hit, key) for one clip; cached at .vedit/faces/<clip>.json (save=False: nothing written)."""
     proxy = proxy_of(paths, clip)
     fp = sample_hash(proxy)
     if fp is None:
@@ -126,9 +128,10 @@ def load_clip(paths: Paths, clip: str, force: bool = False) -> tuple[list[dict],
                 return d["rows"], True, key
         except (ValueError, KeyError):
             pass
-    rows = sample(proxy, paths.logs / "faces.log")
-    paths.faces.mkdir(parents=True, exist_ok=True)
-    f.write_text(json.dumps({"key": key, "rows": rows}))
+    rows = sample(proxy, paths.logs / "faces.log" if save else None)
+    if save:
+        paths.faces.mkdir(parents=True, exist_ok=True)
+        f.write_text(json.dumps({"key": key, "rows": rows}))
     return rows, False, key
 
 
@@ -143,8 +146,8 @@ class FaceTrack:
                 r["cam"] = is_cam(r["box"])
 
     @classmethod
-    def load(cls, paths: Paths, clips, edl: Edl | None = None, force: bool = False):
-        return cls({c: load_clip(paths, c, force)[0] for c in clips}, edl)
+    def load(cls, paths: Paths, clips, edl: Edl | None = None, force: bool = False, save: bool = True):
+        return cls({c: load_clip(paths, c, force, save)[0] for c in clips}, edl)
 
     def row(self, clip: str, st: float) -> dict:
         rows = self.rows[clip]

@@ -4,6 +4,16 @@ A CLI that turns a talk recording (any video file) into a finished edit: cleaned
 subtitles, a 4K60 master, plus Reels/Shorts/TikTok/Stories cut-downs kept clear of each platform's UI. The
 mechanics are settled in code; the model only makes the creative calls.
 
+## Is it the right tool
+
+- **Fits:** a recording of someone speaking (talk, tutorial, podcast, vlog; Arabic or English) that needs a cut,
+  graphics, subtitles or short-form clips. Best with the speaker on camera.
+- **Does not fit:** a video with no recorded speech (ad, launch film, music video, motion graphic, generated or
+  faceless explainer, montage). Build those in HyperFrames directly. Also not for a single ffmpeg job.
+- **Why:** cuts come from the transcript, graphics are anchored to spoken words, framing follows the face.
+
+Agents see the same check in `vedit --help`, `vedit guide` and the `vedit skill` description.
+
 **Status:** v1 built and in use; open work in [`plans/plan.md`](plans/plan.md).
 
 **Your workflow, not ours:** vedit takes any video. Recorder projects (a clean camera behind an export, with its

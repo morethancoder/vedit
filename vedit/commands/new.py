@@ -11,7 +11,7 @@ import yaml
 from vedit import channel as chan
 from vedit import importers, state
 from vedit.ingest.media import ingest_media, plan_of
-from vedit.project import Paths, Project
+from vedit.project import Paths, Project, _source
 from vedit.recording import Recording
 from vedit.report import Report, VeditError
 from vedit.run import ffprobe_duration, log_path
@@ -165,6 +165,59 @@ def _warn_differences(project: Project, cfg: dict, r: Report) -> None:
             )
 
 
+def _sources(inputs: list, link) -> dict:
+    """project.yaml `sources:`; link(name in src/, original) places the file and returns the path to write."""
+    sources: dict = {}
+    for i, (f, rec, imp) in enumerate(inputs):
+        name = string.ascii_uppercase[i]
+        spec: dict = {"file": link(f"{name}{f.suffix}", f)}
+        if rec is not None and rec.camera is not None:
+            cams = [link(f"{name}-camera{'' if k == 0 else f'-{k}'}{c.suffix}", c)
+                    for k, c in enumerate(rec.camera.tracks)]  # fmt: skip
+            spec["camera"] = cams[0] if len(cams) == 1 else cams
+            spec["trims"] = [[t.track, t.start, t.end] for t in rec.camera.trims]
+            spec["fps"] = rec.camera.fps
+            if rec.camera.mirror:
+                spec["mirror"] = True
+        if rec is not None:
+            if rec.origin:
+                spec["origin"] = str(rec.origin)
+            spec["importer"] = imp
+        sources[name] = spec
+    return sources
+
+
+def _dry_run(r: Report, root: Path, paths: Paths, existed: bool, inputs: list) -> Report:
+    """What `vedit new` would write and build, writing nothing."""
+    if existed:
+        plans = [plan_of(s) for s in Project.load(root).sources.values()]
+        writes: list[str] = []
+    else:
+        links: list[str] = []
+        specs = _sources(inputs, lambda name, target: links.append(f"src/{name}") or str(target))
+        plans = [plan_of(_source(n, sp, paths.project_yaml, root)) for n, sp in specs.items()]
+        writes = ["project.yaml", "cuts.yaml", "cues.yaml", "custom/", *links]
+    outputs, built, warns = ingest_media(paths, plans, log_path(root, "new"), dry=True)
+    for w in warns:
+        r.warn(w)
+    src_bytes = sum(p.file.stat().st_size for p in plans)
+    r.step(f"{root.name}  ({root})  dry run: nothing written")
+    r.info("existing project: project.yaml kept" if existed else f"would write: {', '.join(writes)}")
+    for p in plans:
+        how = f"  (clean camera on {len(p.camera.trims)} trims)" if p.camera else ""
+        r.info(f"source {p.name}: {p.file.name}{how}")
+    r.info(
+        f"media: {len(built)} to build, {len(outputs) - len(built)} reused"
+        + (f": {', '.join(built)}" if built else "")
+    )
+    r.data = {"dry_run": True, "project": str(root), "created": not existed, "writes": writes,
+              "build": built, "reuse": [o.relative_to(paths.media).as_posix() for o in outputs
+                                        if o.relative_to(paths.media).as_posix() not in built],
+              "source_bytes": src_bytes, "model_calls": 0}  # fmt: skip
+    r.next = "rerun without --dry-run"
+    return r
+
+
 def run(ns) -> Report:
     r = Report("new")
     inputs, base = _classify(ns.inputs)
@@ -179,32 +232,18 @@ def run(ns) -> Report:
         )
     paths = Paths(root)
     existed = paths.project_yaml.is_file()
+    if ns.dry_run:
+        return _dry_run(r, root, paths, existed, inputs)
     root.mkdir(parents=True, exist_ok=True)
     paths.src.mkdir(exist_ok=True)
     paths.custom.mkdir(exist_ok=True)
     paths.ensure()
 
-    sources: dict = {}
-    for i, (f, rec, imp) in enumerate(inputs):
-        name = string.ascii_uppercase[i]
-        _link(paths.src / f"{name}{f.suffix}", f)
-        spec: dict = {"file": f"src/{name}{f.suffix}"}
-        if rec is not None and rec.camera is not None:
-            cams = []
-            for k, c in enumerate(rec.camera.tracks):
-                link = paths.src / f"{name}-camera{'' if k == 0 else f'-{k}'}{c.suffix}"
-                _link(link, c)
-                cams.append(f"src/{link.name}")
-            spec["camera"] = cams[0] if len(cams) == 1 else cams
-            spec["trims"] = [[t.track, t.start, t.end] for t in rec.camera.trims]
-            spec["fps"] = rec.camera.fps
-            if rec.camera.mirror:
-                spec["mirror"] = True
-        if rec is not None:
-            if rec.origin:
-                spec["origin"] = str(rec.origin)
-            spec["importer"] = imp
-        sources[name] = spec
+    def link(dst_name: str, target: Path) -> str:
+        _link(paths.src / dst_name, target)
+        return f"src/{dst_name}"
+
+    sources = _sources(inputs, link)
 
     if existed:
         project = Project.load(root)

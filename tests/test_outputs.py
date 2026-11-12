@@ -77,6 +77,7 @@ def test_defaults_by_kind():
         ({"id": "a", "kind": "short", "range": {"from": "x", "to": "y"}}, "only for clips and stories"),
         ({"id": "a", "colour": 1}, "unknown key"),
         ({"id": "a", "platforms": ["myspace"]}, "unknown"),
+        ({"id": "a", "kind": "short", "fill": "gradient"}, "fill"),
     ],
 )
 def test_bad_outputs_are_refused(spec, why):
@@ -120,3 +121,9 @@ def test_output_command_add_list_rm(tmp_path, capsys):
     assert d["outputs"][1]["resolved"]["t0"] == 1.5 and d["outputs"][1]["safe_box"]["x"] == 120
     assert cli.main(["output", "rm", "c1", *a]) == 0
     assert cli.main(["output", "rm", "youtube", *a]) == 4  # the last output stays
+
+
+def test_fill_is_plain_unless_asked():
+    outs = parse_outputs([{"id": "s", "kind": "short"}, {"id": "b", "kind": "short", "fill": "blur"}], "f")
+    assert [o.fill for o in outs] == ["plain", "blur"]
+    assert "fill" not in outs[0].as_dict() and outs[1].as_dict()["fill"] == "blur"

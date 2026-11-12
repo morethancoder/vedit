@@ -104,9 +104,10 @@ check_cli() {
 # ─── Confirmation ────────────────────────────────────────
 # confirm "question?": returns 0 on yes; auto-yes when CI=1.
 confirm() {
-  [ "${CI:-}" = "1" ] && return 0
+  [ "${CI:-}" = "1" ] || [ "${YES:-}" = "1" ] && return 0
   local reply
   printf '%s?%s %s [y/N] ' "$YELLOW" "$RESET" "$*"
+  if [ ! -t 0 ]; then echo "no terminal, answering no (rerun with YES=1 to accept)"; return 1; fi
   read -r reply || return 1
   case "$reply" in [yY]|[yY][eE][sS]) return 0 ;; *) return 1 ;; esac
 }

@@ -9,14 +9,15 @@ EPILOG = "example: vedit skill install --yes"
 
 POINTER = """---
 name: vedit
-description: Edit a talk recording into a finished YouTube video with the vedit CLI (cuts, graphics, subtitles, render). Use when asked to edit, cut, caption or render a recording.
+description: Edit a recording of someone speaking (talk, tutorial, podcast, vlog) into a finished video with the vedit CLI (cuts, graphics, subtitles, render, short-form clips). Use when asked to edit, cut, caption, clip or render a recording. Not for videos with no recorded speech (ads, launch films, music videos, motion graphics, generated explainers).
 ---
 Run `vedit skill` for the full instructions, then `vedit guide` for the map.
 Run `vedit guide <topic>` before writing cuts.yaml or cues.yaml.
 """
 
 AGENTS = """## vedit (video editing CLI)
-Editing a recording into a YouTube video: run `vedit skill`, then `vedit guide`.
+Editing a recording of someone speaking into a video or short-form clips (not for videos with no
+recorded speech): run `vedit skill`, then `vedit guide`.
 Run `vedit guide <topic>` before writing cuts.yaml or cues.yaml."""
 
 
